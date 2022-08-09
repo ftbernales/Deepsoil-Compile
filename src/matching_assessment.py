@@ -20,7 +20,6 @@ from scipy.stats.mstats import gmean
 from itertools import repeat
 from re import search
 
-import response_spectrum as rsp
 import intensity_measures as ims
 from sm_utils import convert_accel_units as conv
 
@@ -248,13 +247,6 @@ def _record_rotdnn(record, suite_dir, ALIASES, periods, damping_level,
     RotDnn_cgs = ims.rotdpp(record_acc_H1, dt, record_acc_H2, dt,
                             periods, percentile=percentile,
                             damping=damping_level, units='g')[0]
-    # # FOR WORKFLOW TESTING ONLY
-    # sax, say = ims.get_response_spectrum_pair(
-    #                 record_acc_H1, dt, record_acc_H2, dt,
-    #                 periods, damping=damping_level, units='g')
-    #
-    # # calculate GeoMean spectra for record pair, but result is in cgs units
-    # RotDnn_cgs = ims.geometric_mean_spectrum(sax, say)
 
     # convert to g units
     RotDnn_SA_g = conv(RotDnn_cgs["Pseudo-Acceleration"],
