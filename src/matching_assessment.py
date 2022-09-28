@@ -188,8 +188,12 @@ def detect_damping_ratio(suite_dir):
 
     damping = []
     for target in targets:
-        damping.append(
-            float(target[target.find('(') + 1:target.find('%')]) / 100)
+        try:
+            damping.append(
+                float(target[target.find('(') + 1:target.find('%')]) / 100)
+        except ValueError:
+            raise ValueError('Input valid damping ratio value!')
+
     if len(set(damping)) != 1:
         raise ValueError('Damping ratios in target files are inconsistent!')
     else:
