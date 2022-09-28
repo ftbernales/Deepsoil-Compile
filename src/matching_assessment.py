@@ -261,7 +261,7 @@ def compute_suite_rotdnn_spectra(suite_dir, periods, trt,
     Calculate RotDnn Response Spectra for each record in a given suite of
     acceleration time-histories from ASC/SZ regions.
     """
-    print("Calculting " + trt + f" RotD{percentile:.0f}-component spectra...")
+    print("Calculating " + trt + f" RotD{percentile:.0f}-component spectra...")
 
     dir_list = os.listdir(suite_dir)
     manager = mp.Manager()
