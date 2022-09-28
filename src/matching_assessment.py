@@ -213,8 +213,12 @@ def detect_percentile(suite_dir):
     
     percentile = []
     for target in targets:
-        percentile.append(float(target[target.lower().find('rotd') + 4:
+        try:
+            percentile.append(float(target[target.lower().find('rotd') + 4:
                         target.lower().find('target')]))
+        except ValueError:
+            raise ValueError('Input valid RotDnn value!')
+
     if len(set(percentile)) != 1:
         raise ValueError('Percentile in target files are inconsistent!')
     else:
