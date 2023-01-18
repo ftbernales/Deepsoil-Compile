@@ -139,7 +139,7 @@ def df_next_comb(xlsx, df, sheet_name, mean_col):
 
 
 def main():
-    start_time = time.time()
+    start_time = time.perf_counter()
     cwd = os.path.abspath('./data/input_files/')
     profiles = os.listdir(cwd)
     profiles = [f for f in profiles if f.startswith('profile_')]
@@ -296,7 +296,7 @@ def main():
     df_stress_comb.to_excel(writer_Merged_Prof, 'Stress Ratio')
     writer_Merged_Prof.save()
 
-    end_time = time.time()
+    end_time = time.perf_counter()
     # Log run statistics
     print(  f"Program ran successfully. "
             f"Finished in {(end_time - start_time): .2f} seconds.")
