@@ -21,9 +21,10 @@ def merge_profile(profile):
     df_stress = pd.DataFrame()
 
     for folder in folders:
-        motion = folder[len("Motion_"):]
+        pos = folder.find('(') - 1
+        motion = folder[7:pos]
         conn = sqlite3.connect('./data/input_files/' + profile + '/' +
-                               folder + '/deepsoilout.db3')
+                               folder + '/deepsoilout_el.db3')
 
         # Input Motion
         df_next_input = pd.read_sql_query(
@@ -107,18 +108,18 @@ def merge_profile(profile):
     df_stress['Mean'] = df_stress.mean(axis=1)
 
     # Write RS to Excel
-    writer_SRA = pd.ExcelWriter('./data/output_files/' + profile + '/' +
+    writer_SRA = pd.ExcelWriter('./data/output_files_el/' + profile + '/' +
                                 profile + '_RS.xlsx')
     df_input.to_excel(writer_SRA, 'Input Motion')
-    df_input_mean.to_excel(writer_SRA, 'Input GeoMean Spectra')
+    df_input_mean.to_excel(writer_SRA, 'Input GM Spectra')
     df_surface.to_excel(writer_SRA, 'Surface Motion')
-    df_surface_mean.to_excel(writer_SRA, 'Surface GeoMean Spectra')
+    df_surface_mean.to_excel(writer_SRA, 'Surface GM Spectra')
     df_ampl.to_excel(writer_SRA, 'Amplification Spectra')
     df_ampl_xim.to_excel(writer_SRA, 'Amplification x_IM,ref')
     writer_SRA.save()
 
     # Write Profile to Excel
-    writer_Profile = pd.ExcelWriter('./data/output_files/' + profile + '/' +
+    writer_Profile = pd.ExcelWriter('./data/output_files_el/' + profile + '/' +
                                     profile + '_Profile.xlsx')
     df_disp.to_excel(writer_Profile, 'Displacement')
     df_strain.to_excel(writer_Profile, 'Strain')
@@ -139,17 +140,17 @@ def df_next_comb(xlsx, df, sheet_name, mean_col):
 
 
 def main():
-    start_time = time.perf_counter()
+    start_time = time.time()
     cwd = os.path.abspath('./data/input_files/')
     profiles = os.listdir(cwd)
     profiles = [f for f in profiles if f.startswith('profile_')]
 
     # output folder and subfolders created if does not exist
-    if not os.path.exists('./data/output_files/'):
-        os.mkdir('./data/output_files/')
+    if not os.path.exists('./data/output_files_el/'):
+        os.mkdir('./data/output_files_el/')
     for profile in profiles:
-        if not os.path.exists('./data/output_files/' + profile):
-            os.mkdir('./data/output_files/' + profile)
+        if not os.path.exists('./data/output_files_el/' + profile):
+            os.mkdir('./data/output_files_el/' + profile)
 
     with mp.Pool() as pool:
         pool.map(merge_profile, profiles)
@@ -169,10 +170,10 @@ def main():
         mean_col = 'Mean ' + profile[8:]
 
         # Compile RS
-        xlsx_RS = pd.ExcelFile('./data/output_files/' + profile + '/' +
+        xlsx_RS = pd.ExcelFile('./data/output_files_el/' + profile + '/' +
                                profile + '_RS.xlsx')
         df_surf_comb = df_next_comb(xlsx_RS, df_surf_comb,
-                                'Surface GeoMean Spectra', mean_col)
+                                'Surface GM Spectra', mean_col)
         df_ampl_comb = df_next_comb(xlsx_RS, df_ampl_comb,
                                 'Amplification Spectra', mean_col)
         df_ampl_xim_comb = df_next_comb(xlsx_RS, df_ampl_xim_comb,
@@ -181,7 +182,7 @@ def main():
             df_surf_mtn_GM = pd.read_excel(xlsx_RS,
                             sheet_name='Surface Motion', index_col=0)
             df_surf_GM = pd.read_excel(xlsx_RS,
-                            sheet_name='Surface GeoMean Spectra', index_col=0)
+                            sheet_name='Surface GM Spectra', index_col=0)
             df_ampl_GM = pd.read_excel(xlsx_RS,
                             sheet_name='Amplification Spectra', index_col=0)
             df_ampl_xim_GM = pd.read_excel(xlsx_RS,
@@ -191,7 +192,7 @@ def main():
                 xlsx_RS, sheet_name='Surface Motion', index_col=0),
                                         fill_value=1)
             df_surf_GM = df_surf_GM.mul(pd.read_excel(
-                xlsx_RS, sheet_name='Surface GeoMean Spectra', index_col=0),
+                xlsx_RS, sheet_name='Surface GM Spectra', index_col=0),
                                         fill_value=1)
             df_ampl_GM = df_ampl_GM.mul(pd.read_excel(
                 xlsx_RS, sheet_name='Amplification Spectra', index_col=0),
@@ -201,7 +202,7 @@ def main():
                                         fill_value=1)
 
         # Compile Profile
-        xlsx_PF = pd.ExcelFile('./data/output_files/' + profile + '/' +
+        xlsx_PF = pd.ExcelFile('./data/output_files_el/' + profile + '/' +
                                profile + '_Profile.xlsx')
 
         # Compile Strain Tab
@@ -274,29 +275,29 @@ def main():
     df_ampl_xim_GM = df_ampl_xim_GM.pow(1. / n_valid_profiles.mean())
 
     # Write RS_Merged
-    writer_Merged_RS = pd.ExcelWriter('./data/output_files/RS_Merged.xlsx')
+    writer_Merged_RS = pd.ExcelWriter('./data/output_files_el/RS_Merged.xlsx')
     df_surf_comb.to_excel(writer_Merged_RS, 'Surface GM Spectra')
     df_ampl_comb.to_excel(writer_Merged_RS, 'Amplification Spectra')
     df_ampl_xim_comb.to_excel(writer_Merged_RS, 'Amplification x_IM,ref')
     writer_Merged_RS.save()
 
     # Write GMs_Merged
-    writer_Merged_GMs = pd.ExcelWriter('./data/output_files/GMs_Merged.xlsx')
+    writer_Merged_GMs = pd.ExcelWriter('./data/output_files_el/GMs_Merged.xlsx')
     df_surf_mtn_GM.to_excel(writer_Merged_GMs, 'Surface Motion')
-    df_surf_GM.to_excel(writer_Merged_GMs, 'Surface GeoMean Spectra')
+    df_surf_GM.to_excel(writer_Merged_GMs, 'Surface GM Spectra')
     df_ampl_GM.to_excel(writer_Merged_GMs, 'Amplification Spectra')
     df_ampl_xim_GM.to_excel(writer_Merged_GMs, 'Amplification x_IM,ref')
     writer_Merged_GMs.save()
 
     # Write Profile_Merged
     writer_Merged_Prof = pd.ExcelWriter(
-        './data/output_files/Profile_Merged.xlsx')
+        './data/output_files_el/Profile_Merged.xlsx')
     df_disp_comb.to_excel(writer_Merged_Prof, 'Displacement')
     df_strain_comb.to_excel(writer_Merged_Prof, 'Strain')
     df_stress_comb.to_excel(writer_Merged_Prof, 'Stress Ratio')
     writer_Merged_Prof.save()
 
-    end_time = time.perf_counter()
+    end_time = time.time()
     # Log run statistics
     print(  f"Program ran successfully. "
             f"Finished in {(end_time - start_time): .2f} seconds.")
