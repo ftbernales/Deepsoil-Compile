@@ -5,11 +5,7 @@ import time
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
-import matplotlib as plt
 
-
-def open_db3():
-    
 
 def merge_profile(profile):
     '''
@@ -25,8 +21,7 @@ def merge_profile(profile):
     df_stress = pd.DataFrame()
 
     for folder in folders:
-        pos = folder.find('(') - 1
-        motion = folder[7:pos]
+        motion = folder[len("Motion_"):]
         conn = sqlite3.connect('./data/input_files/' + profile + '/' +
                                folder + '/deepsoilout.db3')
 
@@ -131,13 +126,6 @@ def merge_profile(profile):
     writer_Profile.save()
 
 
-# def plot_spectra(xlsx, df, sheet_name):
-#     '''
-    
-#     '''
-#     workbook = xlsx.book
-
-
 def df_next_comb(xlsx, df, sheet_name, mean_col):
     '''
     Appends spectral mean of profile to dataframe 
@@ -203,7 +191,7 @@ def main():
                 xlsx_RS, sheet_name='Surface Motion', index_col=0),
                                         fill_value=1)
             df_surf_GM = df_surf_GM.mul(pd.read_excel(
-                xlsx_RS, sheet_name='Surface GM Spectra', index_col=0),
+                xlsx_RS, sheet_name='Surface GeoMean Spectra', index_col=0),
                                         fill_value=1)
             df_ampl_GM = df_ampl_GM.mul(pd.read_excel(
                 xlsx_RS, sheet_name='Amplification Spectra', index_col=0),
@@ -303,7 +291,6 @@ def main():
     # Write Profile_Merged
     writer_Merged_Prof = pd.ExcelWriter(
         './data/output_files/Profile_Merged.xlsx')
-    df_disp_comb.to_excel(writer_Merged_Prof, 'PGA')
     df_disp_comb.to_excel(writer_Merged_Prof, 'Displacement')
     df_strain_comb.to_excel(writer_Merged_Prof, 'Strain')
     df_stress_comb.to_excel(writer_Merged_Prof, 'Stress Ratio')
