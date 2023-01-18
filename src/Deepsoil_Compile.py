@@ -5,7 +5,11 @@ import time
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
+import matplotlib as plt
 
+
+def open_db3():
+    
 
 def merge_profile(profile):
     '''
@@ -111,9 +115,9 @@ def merge_profile(profile):
     writer_SRA = pd.ExcelWriter('./data/output_files/' + profile + '/' +
                                 profile + '_RS.xlsx')
     df_input.to_excel(writer_SRA, 'Input Motion')
-    df_input_mean.to_excel(writer_SRA, 'Input GM Spectra')
+    df_input_mean.to_excel(writer_SRA, 'Input GeoMean Spectra')
     df_surface.to_excel(writer_SRA, 'Surface Motion')
-    df_surface_mean.to_excel(writer_SRA, 'Surface GM Spectra')
+    df_surface_mean.to_excel(writer_SRA, 'Surface GeoMean Spectra')
     df_ampl.to_excel(writer_SRA, 'Amplification Spectra')
     df_ampl_xim.to_excel(writer_SRA, 'Amplification x_IM,ref')
     writer_SRA.save()
@@ -125,6 +129,13 @@ def merge_profile(profile):
     df_strain.to_excel(writer_Profile, 'Strain')
     df_stress.to_excel(writer_Profile, 'Stress Ratio')
     writer_Profile.save()
+
+
+# def plot_spectra(xlsx, df, sheet_name):
+#     '''
+    
+#     '''
+#     workbook = xlsx.book
 
 
 def df_next_comb(xlsx, df, sheet_name, mean_col):
@@ -173,7 +184,7 @@ def main():
         xlsx_RS = pd.ExcelFile('./data/output_files/' + profile + '/' +
                                profile + '_RS.xlsx')
         df_surf_comb = df_next_comb(xlsx_RS, df_surf_comb,
-                                'Surface GM Spectra', mean_col)
+                                'Surface GeoMean Spectra', mean_col)
         df_ampl_comb = df_next_comb(xlsx_RS, df_ampl_comb,
                                 'Amplification Spectra', mean_col)
         df_ampl_xim_comb = df_next_comb(xlsx_RS, df_ampl_xim_comb,
@@ -182,7 +193,7 @@ def main():
             df_surf_mtn_GM = pd.read_excel(xlsx_RS,
                             sheet_name='Surface Motion', index_col=0)
             df_surf_GM = pd.read_excel(xlsx_RS,
-                            sheet_name='Surface GM Spectra', index_col=0)
+                            sheet_name='Surface GeoMean Spectra', index_col=0)
             df_ampl_GM = pd.read_excel(xlsx_RS,
                             sheet_name='Amplification Spectra', index_col=0)
             df_ampl_xim_GM = pd.read_excel(xlsx_RS,
@@ -284,7 +295,7 @@ def main():
     # Write GMs_Merged
     writer_Merged_GMs = pd.ExcelWriter('./data/output_files/GMs_Merged.xlsx')
     df_surf_mtn_GM.to_excel(writer_Merged_GMs, 'Surface Motion')
-    df_surf_GM.to_excel(writer_Merged_GMs, 'Surface GM Spectra')
+    df_surf_GM.to_excel(writer_Merged_GMs, 'Surface GeoMean Spectra')
     df_ampl_GM.to_excel(writer_Merged_GMs, 'Amplification Spectra')
     df_ampl_xim_GM.to_excel(writer_Merged_GMs, 'Amplification x_IM,ref')
     writer_Merged_GMs.save()
@@ -292,6 +303,7 @@ def main():
     # Write Profile_Merged
     writer_Merged_Prof = pd.ExcelWriter(
         './data/output_files/Profile_Merged.xlsx')
+    df_disp_comb.to_excel(writer_Merged_Prof, 'PGA')
     df_disp_comb.to_excel(writer_Merged_Prof, 'Displacement')
     df_strain_comb.to_excel(writer_Merged_Prof, 'Strain')
     df_stress_comb.to_excel(writer_Merged_Prof, 'Stress Ratio')
