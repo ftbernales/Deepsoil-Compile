@@ -2,6 +2,7 @@ import os
 import sys
 import pathlib
 import shutil
+import pandas as pd
 from zipfile import ZipFile
 
 '''
@@ -20,8 +21,7 @@ PWP_MODEL = {   "S_VD", # Sand - Vucetic-Dobry model
                 "S_GMP",# Sand - Green-Mitchell-Polito model
                 "G_PA", # Sand - Park-Ahn model
                 "S_BD", # Sand - Berrill-Davis model
-                "C_M",  # Clay - Matasovic model
-                "A_G"   # Any - Generalized model
+                "C_M"  # Clay - Matasovic model
             }
 
 
@@ -73,9 +73,6 @@ class ClayMatasovic(PWPGenModel):
         'PWP_G'#:'0.1'
     }
 
-class Generalized(PWPGenModel):
-    pass
-
 def rename_dpz(fname):
     '''
     Replace extension of .dpz file to .zip while retaining original copy
@@ -88,28 +85,61 @@ def rename_dpz(fname):
     os.replace(temp, temp[len('copy_'):])
     return p
     
-def parse_pwp_params(fname):
+def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     '''
-    Read zip file, open ProfileX files, and parse for PWP parameters
-    '''
+    Read zip file, open and parse ProfileX files, and then insert PWP parameters
+
+    :param zip_file:
+        Name of zip file
+    :type zip_file: ``str``
+    :param layer_info:
+        Dictionary of layer info with PWP inputs
+    :type layer_info: ``dict``
+    :param \**kwargs:
+        See below
+
+    :Keyword Arguments:
+    * `output_dir` (``str``) --
+        Name of output file
+    '''      
     # Open zip file with context manager
-    with ZipFile(fname, 'r') as zip:
+    with ZipFile(zip_file, 'r') as zip:
         # Read without extracting the ProfileX files
-        data = zip.read('Profile1')     
+        data = zip.read('Profile1') # override base profile
+
+        # Count profiles and then loop for all
+        # Link Profile 1 and ProfileX via thickness info
         print(data)   
 
-        
-    # Parse for PWP model parameters
-    #   Loop until 
-    #   Detect [MRDF] tag
-    #   Format writer -> "[]" syntax
-    #   Just insert PWP model parameters to each layer in ProfileX
+        # Parse Profile to insert PWP model parameters
+        #   Loop until detect [MRDF] tag
+        #   Format writer -> "[]" syntax
+        #   Just insert PWP model parameters to each layer in ProfileX
+        #   Export to ProfileX.dp files
 
-    # export_dp()
-    
-def export_dp():
+def read_pwp_csv(fname=None):
     '''
-    Write and export DEEPSOIL all .dp files in same dir
+    Read and parse csv file containing PWP parameters.
+
+    This requires a csv file with file name:
+        '{fcsv}_model-inputs.csv'
+    
+    Returns a dictionary of layer information and PWP model inputs
+    '''
+    if fname is None:
+        fcsv = '{fcsv}_model-inputs.csv'
+    else:
+        fcsv = fname[:-4] + 'model-inputs.csv' # remove file ext and add latter
+
+    layers_pwp = {}
+    
+    return layers_pwp
+    
+def export_dp(output_dir=None):
+    '''
+    Write and export DEEPSOIL all .dp files packaged in zip file.
+    
+    By default, this will output the zip package within the same directory.
     '''
     pass
 
@@ -127,13 +157,15 @@ if __name__ == "__main__":
             # Raise exception if no dpz file found
             raise FileNotFoundError('No dpz file found.')
     else:
-        # Get file name from argv command line
+        # Get file name from argv command line; NOT YET TESTED
         file_name = sys.argv[1]
 
     # Get file extension of argv
     file_ext = pathlib.Path(file_name).suffix
     if not file_ext.lower() == ".dpz":
         raise ValueError('File extension is invalid.')
-
-    dpz_to_zip = rename_dpz(file_name)
-    parse_pwp_params(dpz_to_zip)
+    else:
+        dpz_to_zip = rename_dpz(file_name)
+    
+    read_pwp_csv(file_name)
+    generate_dp_from_zip(dpz_to_zip)
