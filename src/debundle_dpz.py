@@ -101,7 +101,9 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     :Keyword Arguments:
     * `output_dir` (``str``) --
         Name of output file
-    '''      
+    '''
+    layers_pwp = read_pwp_csv(zip_file)    
+
     # Open zip file with context manager
     with ZipFile(zip_file, 'r') as zip:
         # Read without extracting the ProfileX files
@@ -109,13 +111,14 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
 
         # Count profiles and then loop for all
         # Link Profile 1 and ProfileX via thickness info
-        print(data)   
+        # print(data)
 
         # Parse Profile to insert PWP model parameters
         #   Loop until detect [MRDF] tag
         #   Format writer -> "[]" syntax
         #   Just insert PWP model parameters to each layer in ProfileX
         #   Export to ProfileX.dp files
+        #   Delete zip file
 
 def read_pwp_csv(fname=None):
     '''
@@ -127,12 +130,13 @@ def read_pwp_csv(fname=None):
     Returns a dictionary of layer information and PWP model inputs
     '''
     if fname is None:
-        fcsv = '{fcsv}_model-inputs.csv'
+        fcsv = '{fcsv}_model-inputs.csv' # edit later
     else:
-        fcsv = fname[:-4] + 'model-inputs.csv' # remove file ext and add latter
+        fcsv = os.path.join(fname[:-4], + '_model-inputs.csv') # remove file ext and add latter
 
     layers_pwp = {}
-    
+    df_layers_pwp = pd.read_csv(fcsv, skiprows=4, index_col=0)
+    print(df_layers_pwp)
     return layers_pwp
     
 def export_dp(output_dir=None):
@@ -167,5 +171,4 @@ if __name__ == "__main__":
     else:
         dpz_to_zip = rename_dpz(file_name)
     
-    read_pwp_csv(file_name)
     generate_dp_from_zip(dpz_to_zip)
