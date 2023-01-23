@@ -177,7 +177,7 @@ if __name__ == "__main__":
         raise ValueError('File extension is invalid.')
     else:
         dpz_to_zip = replace_file_ext(file_name, to_='zip')
-        # Default file name for PWP parameter csv files (for now)
+        # Default file name to be read for PWP parameter csv files (for now)
         fcsv = os.path.splitext(dpz_to_zip)[0] + '_model-inputs.csv'
         layers_pwp = read_pwp_csv(fcsv) # read csv file and get layer info dict
         generate_dp_from_zip(dpz_to_zip) # generate dp files
