@@ -122,9 +122,6 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
 def read_pwp_csv(fname=None):
     '''
     Read and parse csv file containing PWP parameters.
-
-    This requires a csv file with file name:
-        '{fcsv}_model-inputs.csv'
     
     Returns a dictionary of layer information and PWP model inputs
     '''
