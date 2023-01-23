@@ -113,21 +113,26 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     * `output_dir` (``str``) --
         Name of output file
     '''
-    # Open gzip file with context manager
-    #     
-    # with gzip.open(zip_file, 'rt') as zip:
-    #     data = zip.read() # override base profile
-    #     print(data)
-    gz_extract(os.path.abspath('.'))
-        # Count profiles and then loop for all
-        # Link Profile 1 and ProfileX via thickness info
+    # Reads manually extracted folder (FOR NOW) because of zip/gzip issues
+    parent_dir = os.path.dirname(os.path.abspath(zip_file))
+    extracted_dir = os.path.join(os.path.join(parent_dir, 
+                        os.path.splitext(zip_file)[0]))
+    dir_list = os.listdir(extracted_dir)
 
-        # Parse Profile to insert PWP model parameters
-        #   Loop until detect [MRDF] tag
-        #   Format writer -> "[]" syntax
-        #   Just insert PWP model parameters to each layer in ProfileX
-        #   Export to ProfileX.dp files
-        #   Delete zip file
+    # Get list of randomized profiles
+    rand_profiles = [i for i in dir_list if any(xi in i for xi in ['Profile'])]
+    rand_profiles = [i for i in rand_profiles if not any(xi in i for xi in ['_'])]
+    num_rands = len(rand_profiles) - 1
+
+    # Link Profile 1 and ProfileX via thickness info
+    # then loop for all
+
+    # Parse Profile to insert PWP model parameters
+    #   Loop until detect [MRDF] tag
+    #   Format writer -> "[]" syntax
+    #   Just insert PWP model parameters to each layer in ProfileX
+    #   Export to ProfileX.dp files
+    #   Delete zip file
 
 def read_pwp_csv(fname=None):
     '''
