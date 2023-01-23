@@ -3,7 +3,7 @@ import sys
 import pathlib
 import shutil
 import pandas as pd
-from zipfile import ZipFile
+import gzip
 
 '''
 Script for processing DEEPSOIL profile bundle files (.dpz) to individual
@@ -83,7 +83,19 @@ def replace_file_ext(fname, to_='zip'):
     new_p = p.replace(p.with_suffix('.' + to_))
     os.replace(temp, temp[len('copy_'):])
     return new_p
-    
+
+def gz_extract(directory):
+    extension = ".gz"
+    os.chdir(directory)
+    for item in os.listdir(directory): # loop through items in dir
+      if item.endswith(extension): # check for ".gz" extension
+          gz_name = os.path.abspath(item) # get full path of files
+          # get file name for file within
+          file_name = (os.path.basename(gz_name)).rsplit('.',1)[0] 
+          with gzip.open(gz_name,"rb") as f_in, open(file_name,"wb") as f_out:
+              shutil.copyfileobj(f_in, f_out)
+          os.remove(gz_name) # delete zipped file
+
 def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     '''
     Read zip file, open and parse ProfileX files, and then insert PWP parameters
@@ -101,15 +113,14 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     * `output_dir` (``str``) --
         Name of output file
     '''
-
-    # Open zip file with context manager
-    with ZipFile(zip_file, 'r') as zip:
-        # Read without extracting the ProfileX files
-        data = zip.read('Profile1') # override base profile
-
+    # Open gzip file with context manager
+    #     
+    # with gzip.open(zip_file, 'rt') as zip:
+    #     data = zip.read() # override base profile
+    #     print(data)
+    gz_extract(os.path.abspath('.'))
         # Count profiles and then loop for all
         # Link Profile 1 and ProfileX via thickness info
-        # print(data)
 
         # Parse Profile to insert PWP model parameters
         #   Loop until detect [MRDF] tag
@@ -176,7 +187,7 @@ if __name__ == "__main__":
     if not file_ext.lower() == ".dpz":
         raise ValueError('File extension is invalid.')
     else:
-        dpz_to_zip = replace_file_ext(file_name, to_='zip')
+        dpz_to_zip = replace_file_ext(file_name, to_='gz')
         # Default file name to be read for PWP parameter csv files (for now)
         fcsv = os.path.splitext(dpz_to_zip)[0] + '_model-inputs.csv'
         layers_pwp = read_pwp_csv(fcsv) # read csv file and get layer info dict
