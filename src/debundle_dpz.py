@@ -143,8 +143,7 @@ def read_pwp_csv(fname=None):
     # Convert layer index to int
     df_layers_pwp.index = df_layers_pwp.index.astype("int")
     # Convert df to dict
-    layers_pwp = df_layers_pwp.to_dict('records')
-
+    layers_pwp = df_layers_pwp.to_dict('index')
     return layers_pwp
     
 def export_dp(output_dir=None):
