@@ -101,7 +101,6 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     * `output_dir` (``str``) --
         Name of output file
     '''
-    layers_pwp = read_pwp_csv(zip_file)    
 
     # Open zip file with context manager
     with ZipFile(zip_file, 'r') as zip:
@@ -144,7 +143,7 @@ def read_pwp_csv(fname=None):
     # Convert layer index to int
     df_layers_pwp.index = df_layers_pwp.index.astype("int")
     # Convert df to dict
-    layers_pwp = df_layers_pwp.to_dict('dict')
+    layers_pwp = df_layers_pwp.to_dict('records')
 
     return layers_pwp
     
@@ -179,4 +178,7 @@ if __name__ == "__main__":
         raise ValueError('File extension is invalid.')
     else:
         dpz_to_zip = replace_file_ext(file_name, to_='zip')
-        generate_dp_from_zip(dpz_to_zip)
+        # Default file name for PWP parameter csv files (for now)
+        fcsv = os.path.splitext(dpz_to_zip)[0] + '_model-inputs.csv'
+        layers_pwp = read_pwp_csv(fcsv) # read csv file and get layer info dict
+        generate_dp_from_zip(dpz_to_zip) # generate dp files
