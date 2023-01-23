@@ -73,17 +73,16 @@ class ClayMatasovic(PWPGenModel):
         'PWP_G'#:'0.1'
     }
 
-def rename_dpz(fname):
+def replace_file_ext(fname, to_='zip'):
     '''
-    Replace extension of .dpz file to .zip while retaining original copy
+    Replace extension of file while retaining original copy
     '''
     temp = 'copy_' + fname
     shutil.copy(fname, temp)
     p = pathlib.Path(fname)
-    if not os.path.isfile(p): # Check if file exists, else rename file extension
-        p.rename(p.with_suffix('.zip'))
+    new_p = p.replace(p.with_suffix('.' + to_))
     os.replace(temp, temp[len('copy_'):])
-    return p
+    return new_p
     
 def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     '''
@@ -129,14 +128,27 @@ def read_pwp_csv(fname=None):
     
     Returns a dictionary of layer information and PWP model inputs
     '''
-    if fname is None:
-        fcsv = '{fcsv}_model-inputs.csv' # edit later
-    else:
-        fcsv = os.path.join(fname[:-4], + '_model-inputs.csv') # remove file ext and add latter
+    if fname is None: # do by default
+        raise FileNotFoundError # raise exception if no fname entered
 
-    layers_pwp = {}
-    df_layers_pwp = pd.read_csv(fcsv, skiprows=4, index_col=0)
-    print(df_layers_pwp)
+    # Read csv file, skip first 5 rows with docs, set Layer ID as index col
+    df_layers_pwp = pd.read_csv(fname, skiprows=5, index_col=0)
+    
+    # Process columns
+    col_names = list(df_layers_pwp.columns.values) # get list of col names
+    new_col_names = [item.replace('\n', ' ') for item in col_names] # clear '\n'
+    df_layers_pwp.columns = new_col_names # replace with new col names w/o '\n'
+    df_layers_pwp.drop(df_layers_pwp.columns[
+        df_layers_pwp.columns.str.contains('unnamed', case=False)],
+        axis = 1, inplace = True) # remove unnamed columns
+    
+    # Drop NaN index values
+    df_layers_pwp = df_layers_pwp.loc[df_layers_pwp.index.dropna()]
+    # Convert layer index to int
+    df_layers_pwp.index = df_layers_pwp.index.astype("int")
+    # Convert df to dict
+    layers_pwp = df_layers_pwp.to_dict('dict')
+
     return layers_pwp
     
 def export_dp(output_dir=None):
@@ -169,6 +181,5 @@ if __name__ == "__main__":
     if not file_ext.lower() == ".dpz":
         raise ValueError('File extension is invalid.')
     else:
-        dpz_to_zip = rename_dpz(file_name)
-    
-    generate_dp_from_zip(dpz_to_zip)
+        dpz_to_zip = replace_file_ext(file_name, to_='zip')
+        generate_dp_from_zip(dpz_to_zip)
