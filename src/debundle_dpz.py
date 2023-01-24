@@ -27,36 +27,36 @@ PWP_MODEL = {   "S_VD", # Sand - Vucetic-Dobry model
 
 class PWPGenModel(object):
     PWP_MODEL = {
-        'RU', #0.95,
-        'CV', #0.1,
-        'CV_EXPONENT', #0,
+        'INPUT 1': 'RU', #0.95,
+        'INPUT 2': 'CV', #0.1,
+        'INPUT 3': 'CV_EXPONENT' #0,
     }
 
 class SandVuceticDobry(PWPGenModel):
     REQUIRES_PARAMETERS = {
-        'PWP_F1', #1, 
-        'PWP_P', #1, 
-        'PWP_F2', #0.73,
-        'PWP_S', #1, 
-        'PWP_G', #0.02,
-        'PWP_V' #3.8
+        'INPUT 1': 'PWP_F1', #1, 
+        'INPUT 2': 'PWP_P', #1, 
+        'INPUT 3': 'PWP_F2', #0.73,
+        'INPUT 4': 'PWP_S', #1, 
+        'INPUT 5': 'PWP_G', #0.02,
+        'INPUT 6': 'PWP_V' #3.8
     }
 
 class SandGreenMitchellPolito(PWPGenModel):
     REQUIRES_PARAMETERS = {
-        'PWP_ALPHA'#:[2],
-        'PWP_DR'#:[95],
-        'PWP_FC'#:[15],
-        'PWP_V'#:[3.8]
+        'INPUT 1': 'PWP_ALPHA',#:[2]
+        'INPUT 2': 'PWP_DR',#:[95]
+        'INPUT 3': 'PWP_FC',#:[15]
+        'INPUT 4': 'PWP_V'#:[3.8]
     }
 
 class SandParkAhn(PWPGenModel):
     REQUIRES_PARAMETERS = {
-        'PWP_ALPHA',#:'0.7' 
-        'PWP_BETA',#:'0.7' 
-        'PWP_DRU1',#:'15' 
-        'PWP_CSRT',#:'0.3' 
-        'PWP_V',#:'3.8'
+        'INPUT 1': 'PWP_ALPHA',#:'0.7' 
+        'INPUT 2': 'PWP_BETA',#:'0.7' 
+        'INPUT 3': 'PWP_DRU1',#:'15' 
+        'INPUT 4': 'PWP_CSRT',#:'0.3' 
+        'INPUT 5': 'PWP_V'#:'3.8'
     }
 
 class SandBerrillDavis(PWPGenModel):
@@ -64,13 +64,13 @@ class SandBerrillDavis(PWPGenModel):
 
 class ClayMatasovic(PWPGenModel):
     REQUIRES_PARAMETERS = {
-        'PWP_S'#:'0.122'
-        'PWP_R'#:'0.522'
-        'PWP_A'#:'13.66'
-        'PWP_B'#:'-28.01'
-        'PWP_C'#:'16.508'
-        'PWP_D'#:'-2.149'
-        'PWP_G'#:'0.1'
+        'INPUT 1': 'PWP_S'#:'0.122'
+        'INPUT 2': 'PWP_R'#:'0.522'
+        'INPUT 3': 'PWP_A'#:'13.66'
+        'INPUT 4': 'PWP_B'#:'-28.01'
+        'INPUT 5': 'PWP_C'#:'16.508'
+        'INPUT 6': 'PWP_D'#:'-2.149'
+        'INPUT 7': 'PWP_G'#:'0.1'
     }
 
 PWP_MODEL = {   "S_VD": SandVuceticDobry(), # Sand - Vucetic-Dobry model
