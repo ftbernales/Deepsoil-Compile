@@ -212,13 +212,13 @@ def read_pwp_csv(fname=None):
     layers_pwp = df_layers_pwp.to_dict('index')
     return layers_pwp
     
-def export_dp(output_dir=None):
+def export_dp_to_zip(output_dir=None):
     '''
     Write and export DEEPSOIL all .dp files packaged in zip file.
     
     By default, this will output the zip package within the same directory.
     '''
-    pass
+    raise NotImplementedError
 
 if __name__ == "__main__":
     if len(sys.argv) > 0:
