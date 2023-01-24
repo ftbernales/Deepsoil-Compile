@@ -64,12 +64,12 @@ class SandBerrillDavis(PWPGenModel):
 
 class ClayMatasovic(PWPGenModel):
     REQUIRES_PARAMETERS = {
-        'INPUT 1': 'PWP_S'#:'0.122'
-        'INPUT 2': 'PWP_R'#:'0.522'
-        'INPUT 3': 'PWP_A'#:'13.66'
-        'INPUT 4': 'PWP_B'#:'-28.01'
-        'INPUT 5': 'PWP_C'#:'16.508'
-        'INPUT 6': 'PWP_D'#:'-2.149'
+        'INPUT 1': 'PWP_S',#:'0.122'
+        'INPUT 2': 'PWP_R',#:'0.522'
+        'INPUT 3': 'PWP_A',#:'13.66'
+        'INPUT 4': 'PWP_B',#:'-28.01'
+        'INPUT 5': 'PWP_C',#:'16.508'
+        'INPUT 6': 'PWP_D',#:'-2.149'
         'INPUT 7': 'PWP_G'#:'0.1'
     }
 
