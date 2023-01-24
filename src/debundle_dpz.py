@@ -171,7 +171,9 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     with open(os.path.join(extracted_dir, 'Profile1.dp'), 'w') as base_profile:
         # Set config for ANALYSIS_TYPE to include PWP generation in NL analysis
         # Set config for DISSIPATION conditions
-        SET_PWP = f'[ANALYSIS_TYPE]:[NONLINEAR+PWP]\n[DISSIPATION]:[TRUE] [TOP_BOUNDARY_PERMEABLE]:[TRUE] [BOTTOM_BOUNDARY_PERMEABLE]:[FALSE]\n'
+        SET_PWP = ('[ANALYSIS_TYPE]:[NONLINEAR+PWP]\n[DISSIPATION]:[TRUE] '
+                   '[TOP_BOUNDARY_PERMEABLE]:[TRUE] '
+                   '[BOTTOM_BOUNDARY_PERMEABLE]:[FALSE]\n')
         
         idx = [(x,i) for x,i in enumerate(contents) if '[ANALYSIS_TYPE]' in i]
         aidx, atag = idx[0]
