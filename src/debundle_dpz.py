@@ -74,7 +74,7 @@ class ClayMatasovic(PWPGenModel):
     }
 
 PWP_MODEL = {   "S_VD": SandVuceticDobry(), # Sand - Vucetic-Dobry model
-                "S_GMP": SandGreenMitchellPolito, # Sand - GMP model
+                "S_GMP": SandGreenMitchellPolito(), # Sand - GMP model
                 "G_PA": SandParkAhn(), # Sand - Park-Ahn model
                 "S_BD": SandBerrillDavis(), # Sand - Berrill-Davis model
                 "C_M": ClayMatasovic()  # Clay - Matasovic model
