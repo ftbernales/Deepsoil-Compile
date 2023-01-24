@@ -4,6 +4,7 @@ import pathlib
 import shutil
 import pandas as pd
 import gzip
+import re
 
 '''
 Script for processing DEEPSOIL profile bundle files (.dpz) to individual
@@ -16,13 +17,6 @@ profile.
 The script assumes that both the 'Generate Excess Porewater Pressure' option and 
 'Enable Dissipation' sub-option are enabled.
 '''
-
-PWP_MODEL = {   "S_VD", # Sand - Vucetic-Dobry model
-                "S_GMP",# Sand - Green-Mitchell-Polito model
-                "G_PA", # Sand - Park-Ahn model
-                "S_BD", # Sand - Berrill-Davis model
-                "C_M"  # Clay - Matasovic model
-            }
 
 
 class PWPGenModel(object):
@@ -126,20 +120,67 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
                         os.path.splitext(zip_file)[0]))
     dir_list = os.listdir(extracted_dir)
 
-    # Get list of randomized profiles
-    rand_profiles = [i for i in dir_list if any(xi in i for xi in ['Profile'])]
-    rand_profiles = [i for i in rand_profiles if not any(xi in i for xi in ['_'])]
+    # Get list and number of randomized profiles
+    rand_profiles = [i for i in dir_list if 'Profile' in i]
+    rand_profiles = [i for i in rand_profiles if not '_' in i]
     num_rands = len(rand_profiles) - 1
 
-    # Link Profile 1 and ProfileX via thickness info
-    # then loop for all
+    # Read Mean Soil Profile definition
+    with open(os.path.join(extracted_dir, 'Profile1'), 'r') as base_profile:
+        # get file contents line by line and output a list
+        contents = base_profile.readlines()
+    
+    idx = [(x,i) for x,i in enumerate(contents) if '[LAYER]' in i]
+    num_idx = len(idx)
+    
+    # create dict of layer info in Profile1 & then check if consistent with csv
+    Profile1 = {}
+    # Loop for each layer data in `contents` list
+    for i,ln in list(reversed(list(enumerate(idx))))[1:]: 
+        # Get layer info in Mean Profile
+        l_data = contents[idx[i][0]:idx[i+1][0]]
 
-    # Parse Profile to insert PWP model parameters
-    #   Loop until detect [MRDF] tag
-    #   Format writer -> "[]" syntax
-    #   Just insert PWP model parameters to each layer in ProfileX
-    #   Export to ProfileX.dp files
-    #   Delete zip file
+        # Data cleanup
+        l_data_clean = [s.strip('\t\n') for s in l_data]
+        l_data_clean = [re.sub(r"[\([{})\]]", "", s) for s in l_data_clean]
+        
+        # Insert line of PWP parameters in list to be written later in file
+        l_PWP = [l.strip('LAYER:') for l in l_data_clean if 'LAYER:' in l]
+        l_PWP = int(l_PWP[0])
+        PWP_model_data = layer_info[l_PWP]
+        # Convert keys to uppercase
+        PWP_model_data = {k.upper(): v for k,v in PWP_model_data.items()}
+
+        # Map parameter objects
+        model_id = PWP_model_data['MODEL ID']
+        dsp = dict.fromkeys(PWP_MODEL[model_id].DISSIPATION)
+        reqs = PWP_MODEL[model_id].REQUIRES_PARAMETERS
+        PWP_reqs = {**dsp, **reqs}
+
+        # Assemble matching data values
+        PWP_inputs = {'PWP_MODEL': model_id}
+        PWP_inputs.update( {PWP_reqs[k]:PWP_model_data[k] \
+                        for k in PWP_model_data if k in PWP_reqs} )
+        
+        # Line to insert in Profile1 file in DEEPSOIL syntax
+        line_PWP = ' '.join([f"[{k}]:[{v}]" for k,v in PWP_inputs.items()])
+        l_data.insert(-1, '\t' + line_PWP + '\n')
+        contents[idx[i][0]:idx[i+1][0]] = l_data
+
+    # Re-write Profile1 to a new .dp file
+    with open(os.path.join(extracted_dir, 'Profile1.dp'), 'w') as base_profile:
+        # Set config for ANALYSIS_TYPE to include PWP generation in NL analysis
+        # Set config for DISSIPATION conditions
+        SET_PWP = f'[ANALYSIS_TYPE]:[NONLINEAR+PWP]\n[DISSIPATION]:[TRUE] [TOP_BOUNDARY_PERMEABLE]:[TRUE] [BOTTOM_BOUNDARY_PERMEABLE]:[FALSE]\n'
+        
+        idx = [(x,i) for x,i in enumerate(contents) if '[ANALYSIS_TYPE]' in i]
+        aidx, atag = idx[0]
+        contents[aidx] = SET_PWP
+        base_profile.writelines(contents)      
+     
+    # Link Profile1 and ProfileX via thickness info
+
+    #   Delete zip file if it exists
 
 def read_pwp_csv(fname=None):
     '''
@@ -203,4 +244,4 @@ if __name__ == "__main__":
         # Default file name to be read for PWP parameter csv files (for now)
         fcsv = os.path.splitext(dpz_to_zip)[0] + '_model-inputs.csv'
         layers_pwp = read_pwp_csv(fcsv) # read csv file and get layer info dict
-        generate_dp_from_zip(dpz_to_zip) # generate dp files
+        generate_dp_from_zip(dpz_to_zip, layer_info=layers_pwp)
