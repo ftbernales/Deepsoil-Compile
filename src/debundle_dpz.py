@@ -26,11 +26,11 @@ PWP_MODEL = {   "S_VD", # Sand - Vucetic-Dobry model
 
 
 class PWPGenModel(object):
-    PWP_MODEL = {
-        'INPUT 1': 'RU', #0.95,
-        'INPUT 2': 'CV', #0.1,
-        'INPUT 3': 'CV_EXPONENT' #0,
-    }
+    DISSIPATION = [
+        'RU', #0.95,
+        'CV', #0.1,
+        'CV_EXPONENT' #0,
+    ]
 
 class SandVuceticDobry(PWPGenModel):
     REQUIRES_PARAMETERS = {
