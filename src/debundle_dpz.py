@@ -73,6 +73,13 @@ class ClayMatasovic(PWPGenModel):
         'PWP_G'#:'0.1'
     }
 
+PWP_MODEL = {   "S_VD": SandVuceticDobry(), # Sand - Vucetic-Dobry model
+                "S_GMP": SandGreenMitchellPolito, # Sand - GMP model
+                "G_PA": SandParkAhn(), # Sand - Park-Ahn model
+                "S_BD": SandBerrillDavis(), # Sand - Berrill-Davis model
+                "C_M": ClayMatasovic()  # Clay - Matasovic model
+            }
+
 def replace_file_ext(fname, to_='zip'):
     '''
     Replace extension of file while retaining original copy
