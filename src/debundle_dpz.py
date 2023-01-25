@@ -145,6 +145,12 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
         l_data_clean = [s.strip('\t\n') for s in l_data]
         l_data_clean = [re.sub(r"[\([{})\]]", "", s) for s in l_data_clean]
         
+        # Get thickness of layer from basic layer info
+        [basic_l] = [re.findall(r'[^\s]+', l) for l in l_data_clean 
+                                if 'THICKNESS' in l]
+        basic_d = {s.split(':')[0]: float(s.split(':')[1]) for s in basic_l}
+        thk = basic_d['THICKNESS']
+        
         # Insert line of PWP parameters in list to be written later in file
         l_PWP = [l.strip('LAYER:') for l in l_data_clean if 'LAYER:' in l]
         l_PWP = int(l_PWP[0])
@@ -167,6 +173,9 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
         line_PWP = ' '.join([f"[{k}]:[{v}]" for k,v in PWP_inputs.items()])
         l_data.insert(-1, '\t' + line_PWP + '\n')
         contents[idx[i][0]:idx[i+1][0]] = l_data
+
+        # Save Profile1 data to dict
+        Profile1[l_PWP] = {'BASIC': basic_d, 'PWP_MODEL': PWP_inputs}
 
     # Re-write Profile1 to a new .dp file
     with open(os.path.join(extracted_dir, 'Profile1.dp'), 'w') as base_profile:
