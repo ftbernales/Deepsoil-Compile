@@ -193,6 +193,8 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
         contents[aidx] = SET_PWP
         base_profile.writelines(contents)      
 
+    print(f'Export of Profile1.dp is successful.')
+
     # Link Profile1 and ProfileX via model info
     rand_profiles.remove('Profile1')
     # Loop for all ProfileX
