@@ -133,7 +133,8 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     idx = [(x,i) for x,i in enumerate(contents) if '[LAYER]' in i]
     num_idx = len(idx)
     
-    # create dict of layer info in Profile1 & then check if consistent with csv
+    # Create dict of layer info in Profile1 & 
+    # then check if consistent with csv (TBA)
     Profile1 = {}
     # Loop for each layer data in `contents` list
     for i,ln in list(reversed(list(enumerate(idx))))[1:]: 
