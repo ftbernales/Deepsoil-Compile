@@ -5,6 +5,8 @@ import shutil
 import pandas as pd
 import gzip
 import re
+import numpy as np
+from collections import Counter
 
 '''
 Script for processing DEEPSOIL profile bundle files (.dpz) to individual
@@ -121,7 +123,7 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     dir_list = os.listdir(extracted_dir)
 
     # Get list and number of randomized profiles
-    rand_profiles = [i for i in dir_list if 'Profile' in i]
+    rand_profiles = [i for i in dir_list if 'Profile' in i and '.' not in i]
     rand_profiles = [i for i in rand_profiles if not '_' in i]
     num_rands = len(rand_profiles) - 1
 
@@ -136,6 +138,7 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
     # Create dict of layer info in Profile1 & 
     # then check if consistent with csv (TBA)
     Profile1 = {}
+    b_layer_id = list()
     # Loop for each layer data in `contents` list
     for i,ln in list(reversed(list(enumerate(idx))))[1:]: 
         # Get layer info in Mean Profile
@@ -149,11 +152,11 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
         [basic_l] = [re.findall(r'[^\s]+', l) for l in l_data_clean 
                                 if 'THICKNESS' in l]
         basic_d = {s.split(':')[0]: float(s.split(':')[1]) for s in basic_l}
-        thk = basic_d['THICKNESS']
         
         # Insert line of PWP parameters in list to be written later in file
         l_PWP = [l.strip('LAYER:') for l in l_data_clean if 'LAYER:' in l]
         l_PWP = int(l_PWP[0])
+        b_layer_id.append(l_PWP)
         PWP_model_data = layer_info[l_PWP]
         # Convert keys to uppercase
         PWP_model_data = {k.upper(): v for k,v in PWP_model_data.items()}
@@ -189,10 +192,118 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
         aidx, atag = idx[0]
         contents[aidx] = SET_PWP
         base_profile.writelines(contents)      
-     
-    # Link Profile1 and ProfileX via thickness info
 
-    #   Delete zip file if it exists
+    # Link Profile1 and ProfileX via model info
+    rand_profiles.remove('Profile1')
+    # Loop for all ProfileX
+    for rprof in rand_profiles:
+        with open(os.path.join(extracted_dir, rprof), 'r') as rprof_file:
+            rprof_contents = rprof_file.readlines()
+    
+        # Get lines of basic layer info, including thickness
+        rl_thk_lines = [l for l in rprof_contents if 'THICKNESS' in l]
+        
+        basic_l_coll = [re.sub(r"[\([{})\]]", "", s) for s in rl_thk_lines]
+        basic_l_coll = [s.split() for s in basic_l_coll]
+        # Convert to dict
+        basic_d_coll = [{s.split(':')[0]: float(s.split(':')[1]) for s in d} 
+                                    for d in basic_l_coll]
+        
+        # Get lines of basic layer info, including thickness
+        rl_smodel_lines = [l for l in rprof_contents if 'MODEL' in l]
+        
+        smodel_l_coll = [re.sub(r"[\([{})\]]", "", s) for s in rl_smodel_lines]
+        smodel_l_coll = [s.split() for s in smodel_l_coll]
+        # Convert to dict
+        smodel_d_coll = [{s.split(':')[0]: s.split(':')[1] for s in d} 
+                                    for d in smodel_l_coll]
+        
+        # Get list of line index & layer id tuple pairs
+        ridx_all = [(x,i) for x,i in enumerate(rprof_contents) 
+                        if '[LAYER]' in i]
+        
+        # Line index up to Layer Top_of_Rock
+        line_idx = [int(str(l).split(':')[0]) for l,_ in ridx_all]
+        # Layer bounds 
+        l_bounds = [l.strip() for _,l in ridx_all]
+        l_bounds = [re.sub(r"[\([{})\]]", "", s) for s in l_bounds]
+        l_bounds = [l.strip('LAYER:') for l in l_bounds if 'LAYER:' in l]
+        l_bounds[-1] = len(l_bounds) # convert last element TOP_OF_ROCK
+        l_bounds = [int(l) for l in l_bounds]
+        l_soil_bounds = l_bounds[:-1] # remove last rock layer
+        
+        # Create dict of ProfileX data
+        ProfileX = {k: {'BASIC':v1, 'SOIL_MODEL': v2} for k,v1,v2 in 
+                        zip(l_soil_bounds, basic_d_coll, smodel_d_coll)}
+
+        r_layer_str_coll = [float(ProfileX[t]['SOIL_MODEL']['STRENGTH']) for t in 
+                                            l_soil_bounds]
+        
+        # Retrieve corresponding layers 
+        # by counting unique STRENGTH values of sublayers
+        str_counter = Counter(np.around(r_layer_str_coll, decimals=6))
+       
+        # Get list of number of sublayers per layer definition in ProfileX
+        num_layers_coll = [n for _,n in list(str_counter.items())]
+        l_top_idx = np.cumsum(np.insert(num_layers_coll, 0, 1))
+        ridx = [(x,i) for (x,i) in list(zip(line_idx, l_bounds))
+                            if i in l_top_idx]
+        
+        b_layer_id_iter = iter(b_layer_id)
+        bl_id = next(b_layer_id_iter)
+        # Loop for each sublayer data in `rprof_contents` list
+        for i,ln in list(reversed(list(enumerate(l_bounds))))[1:]: 
+            # Get layer info in ProfileX
+            l_data = rprof_contents[ridx_all[i][0]:ridx_all[i+1][0]]
+            
+            # Data cleanup
+            l_data_clean = [s.strip('\t\n') for s in l_data]
+            l_data_clean = [re.sub(r"[\([{})\]]", "", s) for s in l_data_clean]
+            
+            # Insert line of PWP parameters in list to be written later in file
+            # Get PWP model of corresponding layer of ProfileX to Profile1
+            if (l_top_idx[:-1][bl_id-1]) > (i+1):
+                bl_id = next(b_layer_id_iter)
+
+            PWP_model_data = layer_info[bl_id]
+            # Convert keys to uppercase
+            PWP_model_data = {k.upper(): v for k,v in PWP_model_data.items()}
+
+            # Map parameter objects
+            model_id = PWP_model_data['MODEL ID']
+            dsp = dict.fromkeys(PWP_MODEL[model_id].DISSIPATION)
+            reqs = PWP_MODEL[model_id].REQUIRES_PARAMETERS
+            PWP_reqs = {**dsp, **reqs}
+
+            # Assemble matching data values
+            PWP_inputs = {'PWP_MODEL': model_id}
+            PWP_inputs.update( {PWP_reqs[k]:PWP_model_data[k] \
+                            for k in PWP_model_data if k in PWP_reqs} )
+            
+            # Line to insert in Profile1 file in DEEPSOIL syntax
+            line_PWP = ' '.join([f"[{k}]:[{v}]" for k,v in PWP_inputs.items()])
+            l_data.insert(-1, '\t' + line_PWP + '\n')
+            rprof_contents[ridx_all[i][0]:ridx_all[i+1][0]] = l_data
+
+            # Save Profile1 data to dict
+            ProfileX[i+1] = {'BASIC': basic_d, 'PWP_MODEL': PWP_inputs}
+
+        # Re-write ProfileX to a new .dp file
+        with open(os.path.join(extracted_dir, rprof+'.dp'), 'w') as rprof_file:
+            # Set config for ANALYSIS_TYPE to include PWP generation 
+            # Set config for DISSIPATION conditions
+            SET_PWP = ('[ANALYSIS_TYPE]:[NONLINEAR+PWP]\n[DISSIPATION]:[TRUE] '
+                    '[TOP_BOUNDARY_PERMEABLE]:[TRUE] '
+                    '[BOTTOM_BOUNDARY_PERMEABLE]:[FALSE]\n')
+            
+            idx = [(x,i) for x,i in enumerate(rprof_contents) 
+                                              if '[ANALYSIS_TYPE]' in i]
+            aidx, atag = idx[0]
+            rprof_contents[aidx] = SET_PWP
+            rprof_file.writelines(rprof_contents)   
+
+        print(f'Export of {rprof}.dp is successful.')
+    # Delete zip file if it exists
 
 def read_pwp_csv(fname=None):
     '''
