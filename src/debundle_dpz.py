@@ -191,7 +191,8 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
         Profile1[l_PWP] = {'BASIC': basic_d, 'PWP_MODEL': PWP_inputs}
 
     # Re-write Profile1 to a new .dp file
-    with open(os.path.join(extracted_dir, 'Profile1.dp'), 'w') as base_profile:
+    dp_output = 'Profile_BL.dp'
+    with open(os.path.join(extracted_dir, dp_output), 'w') as base_profile:
         # Set config for ANALYSIS_TYPE to include PWP generation in NL analysis
         # Set config for DISSIPATION conditions
         SET_PWP = ('[ANALYSIS_TYPE]:[NONLINEAR+PWP]\n[DISSIPATION]:[TRUE] '
@@ -203,7 +204,7 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
         contents[aidx] = SET_PWP
         base_profile.writelines(contents)      
 
-    print(f'Export of Profile1.dp is successful.')
+    print(f'Export of {dp_output} is successful.')
 
     # Link Profile1 and ProfileX via model info
     rand_profiles.remove('Profile1')
@@ -310,7 +311,8 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
             ProfileX[i+1] = {'BASIC': basic_d, 'PWP_MODEL': PWP_inputs}
 
         # Re-write ProfileX to a new .dp file
-        with open(os.path.join(extracted_dir, rprof+'.dp'), 'w') as rprof_file:
+        rdp_output = 'Profile' + str(int(rprof.strip('Profile')) - 1) + '.dp'
+        with open(os.path.join(extracted_dir, rdp_output), 'w') as rprof_file:
             # Set config for ANALYSIS_TYPE to include PWP generation 
             # Set config for DISSIPATION conditions
             SET_PWP = ('[ANALYSIS_TYPE]:[NONLINEAR+PWP]\n[DISSIPATION]:[TRUE] '
@@ -323,7 +325,7 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
             rprof_contents[aidx] = SET_PWP
             rprof_file.writelines(rprof_contents)   
 
-        print(f'Export of {rprof}.dp is successful.')
+        print(f'Export of {rdp_output} is successful.')
     # Delete zip file if it exists
 
 def read_pwp_csv(fname=None):
