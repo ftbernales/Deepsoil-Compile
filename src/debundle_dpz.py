@@ -160,17 +160,27 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
         PWP_model_data = layer_info[l_PWP]
         # Convert keys to uppercase
         PWP_model_data = {k.upper(): v for k,v in PWP_model_data.items()}
+        # Change csv keys to those admitted in PWP_MODEL object
+        PWP_model_data = {('RU' if k=='RU_MAX' else k):v 
+                           for k,v in list(PWP_model_data.items())}
+        PWP_model_data = {('CV' if k=='CV (M2/S)' else k):v 
+                           for k,v in list(PWP_model_data.items())}
+        PWP_model_data = {('CV_EXPONENT' if k=='CV EXPONENT' else k):v 
+                           for k,v in list(PWP_model_data.items())}        
 
         # Map parameter objects
         model_id = PWP_model_data['MODEL ID']
         dsp = dict.fromkeys(PWP_MODEL[model_id].DISSIPATION)
         reqs = PWP_MODEL[model_id].REQUIRES_PARAMETERS
-        PWP_reqs = {**dsp, **reqs}
 
         # Assemble matching data values
         PWP_inputs = {'PWP_MODEL': model_id}
-        PWP_inputs.update( {PWP_reqs[k]:PWP_model_data[k] \
-                        for k in PWP_model_data if k in PWP_reqs} )
+        PWP_inputs.update( {k:PWP_model_data[k] 
+                    for k in list(PWP_model_data.keys()) 
+                    if k in list(dsp.keys())} ) # assemble dissipation params
+        PWP_inputs.update( {reqs[k]:PWP_model_data[k] 
+                    for k in list(PWP_model_data.keys()) 
+                    if k in list(reqs.keys())} ) # assemble PWP model params
         
         # Line to insert in Profile1 file in DEEPSOIL syntax
         line_PWP = ' '.join([f"[{k}]:[{v}]" for k,v in PWP_inputs.items()])
