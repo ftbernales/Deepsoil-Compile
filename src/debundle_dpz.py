@@ -292,7 +292,7 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
             PWP_inputs.update( {PWP_reqs[k]:PWP_model_data[k] \
                             for k in PWP_model_data if k in PWP_reqs} )
             
-            # Line to insert in Profile1 file in DEEPSOIL syntax
+            # Line to insert in ProfileX file in DEEPSOIL syntax
             line_PWP = ' '.join([f"[{k}]:[{v}]" for k,v in PWP_inputs.items()])
             l_data.insert(-1, '\t' + line_PWP + '\n')
             rprof_contents[ridx_all[i][0]:ridx_all[i+1][0]] = l_data
