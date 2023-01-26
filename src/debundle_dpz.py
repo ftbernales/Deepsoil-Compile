@@ -249,15 +249,15 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
         ProfileX = {k: {'BASIC':v1, 'SOIL_MODEL': v2} for k,v1,v2 in 
                         zip(l_soil_bounds, basic_d_coll, smodel_d_coll)}
 
-        r_layer_str_coll = [float(ProfileX[t]['SOIL_MODEL']['STRENGTH']) for t in 
+        r_layer_uwt_coll = [float(ProfileX[t]['BASIC']['WEIGHT']) for t in 
                                             l_soil_bounds]
         
         # Retrieve corresponding layers 
-        # by counting unique STRENGTH values of sublayers
-        str_counter = Counter(np.around(r_layer_str_coll, decimals=6))
+        # by counting unique UNIT WEIGHT values of sublayers
+        uwt_counter = Counter(np.around(r_layer_uwt_coll, decimals=6))
        
         # Get list of number of sublayers per layer definition in ProfileX
-        num_layers_coll = [n for _,n in list(str_counter.items())]
+        num_layers_coll = [n for _,n in list(uwt_counter.items())]
         l_top_idx = np.cumsum(np.insert(num_layers_coll, 0, 1))
         ridx = [(x,i) for (x,i) in list(zip(line_idx, l_bounds))
                             if i in l_top_idx]
