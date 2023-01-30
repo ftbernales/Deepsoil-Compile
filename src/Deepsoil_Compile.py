@@ -43,8 +43,8 @@ def merge_profile(profile):
 
         # Displacement
         df_next_disp = pd.read_sql_query(
-            'SELECT DEPTH_LAYER_TOP, MIN_DISP_RELATIVE, MAX_DISP_RELATIVE FROM PROFILES',
-            conn)
+            'SELECT DEPTH_LAYER_TOP, MIN_DISP_RELATIVE, MAX_DISP_RELATIVE FROM \
+                PROFILES', conn)
         df_next_disp = df_next_disp.abs()
         df_next_disp[motion] = df_next_disp[[
             'MIN_DISP_RELATIVE', 'MAX_DISP_RELATIVE'
