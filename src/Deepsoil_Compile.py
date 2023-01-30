@@ -275,7 +275,7 @@ def main():
 
     # Write RS_Merged
     writer_Merged_RS = pd.ExcelWriter('./data/output_files/RS_Merged.xlsx')
-    df_surf_comb.to_excel(writer_Merged_RS, 'Surface GM Spectra')
+    df_surf_comb.to_excel(writer_Merged_RS, 'Surface GeoMean Spectra')
     df_ampl_comb.to_excel(writer_Merged_RS, 'Amplification Spectra')
     df_ampl_xim_comb.to_excel(writer_Merged_RS, 'Amplification x_IM,ref')
     writer_Merged_RS.save()
