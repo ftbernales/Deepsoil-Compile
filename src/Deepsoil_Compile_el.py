@@ -45,6 +45,10 @@ def merge_profile(profile):
         df_next_disp = pd.read_sql_query(
             'SELECT DEPTH_LAYER_TOP, MIN_DISP_RELATIVE, MAX_DISP_RELATIVE FROM PROFILES',
             conn)
+        if df_next_disp['MAX_DISP_RELATIVE'].isnull().values.any():
+            df_next_disp['MAX_DISP_RELATIVE'] = \
+                df_next_disp['MAX_DISP_RELATIVE'].fillna(0) # fill zeros if Null
+        
         df_next_disp = df_next_disp.abs()
         df_next_disp[motion] = df_next_disp[[
             'MIN_DISP_RELATIVE', 'MAX_DISP_RELATIVE'
