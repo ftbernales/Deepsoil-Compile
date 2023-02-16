@@ -1,6 +1,9 @@
+import sys
 import subprocess
 import pyautogui
 import time
+import os
+
 
 def dp_autogui(dp_file_path):
     result = subprocess.Popen([r"C:\Program Files"
@@ -55,7 +58,12 @@ def dp_autogui(dp_file_path):
     pyautogui.press('space') # Analyze
 
 if __name__ == "__main__":
-    dp_file = (r'C:\Users\AMH-L91\OneDrive - AMH Philippines, Inc\
-        NP22.080 THEIDI Samal-Davao Connector SHA\06 NP22.080 WORK FILES\06 SRA\
-            03C DEEPSOIL (1,000-Year)\03 BH-NB-06\02 PWP\NB-06_PWP\Profile1.dp')
-    dp_autogui(dp_file)
+    if len(sys.argv) <= 1:
+        dp_file = input('Path to .dp file: ')
+    else:
+        dp_file = sys.argv[1]
+    
+    if os.path.isfile(dp_file) and dp_file.lower().endswith('.dp'):
+        dp_autogui(dp_file)
+    else:
+        raise FileNotFoundError("Invalid file.")
