@@ -39,7 +39,7 @@ def dp_autogui(dp_file_path):
         pyautogui.press('space') # select all motions
 
         # Select `Next` from *Input Motion Selection*
-        time.sleep(2.5)
+        time.sleep(2.75)
         if result.poll() is not None:
         # Return code 3221225477 or hex 0xC0000005 STATUS_ACCESS_VIOLATION
             print(f'Program crashed. returncode: {result.returncode}')
