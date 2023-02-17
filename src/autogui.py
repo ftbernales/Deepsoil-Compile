@@ -42,7 +42,7 @@ def dp_autogui(dp_file_path):
         time.sleep(2.75)
         if result.poll() is not None:
         # Return code 3221225477 or hex 0xC0000005 STATUS_ACCESS_VIOLATION
-            print(f'Program crashed. returncode: {result.returncode}')
+            print(f'DEEPSOIL crashed! (returncode: {result.returncode})')
             return result.returncode
         pyautogui.press('tab', presses=10)
         pyautogui.press('space')
@@ -69,7 +69,7 @@ def dp_autogui(dp_file_path):
         
         pyautogui.hotkey('alt', 'f', 'e') # exit DEEPSOIL
 
-    print(f'Program executed successfully. returncode: {result.returncode}')
+    print(f'Program executed successfully for {dp_file_path}')
     return result.returncode
 
 def dp_autogui_dir():
