@@ -72,8 +72,19 @@ def dp_autogui(dp_file_path):
     print(f'Program executed successfully for {dp_file_path}')
     return result.returncode
 
-def dp_autogui_dir():
-    pass
+def dp_autogui_dir(dp_dirname):
+    if not os.path.isdir(dp_dirname):
+        raise FileNotFoundError("Invalid directory.")
+
+    dp_coll = [f for f in os.listdir(dp_dirname) if f.lower().endswith('.dp')]
+    if len(dp_coll) == 0: # empty list
+        raise FileNotFoundError("No .dp files found.")
+    
+    for dp in dp_coll:
+        run_dp = None
+        while run_dp != 0:
+            run_dp = dp_autogui( os.path.join( dp_dirname, dp ) )
+
 
 def is_process_running(process_name):
     '''
@@ -92,12 +103,10 @@ def is_process_running(process_name):
 
 
 if __name__ == "__main__":
+    # If script is ran directly, execute dp_autogui for entire directory
     if len(sys.argv) <= 1:
-        dp_file = input('Path to .dp file: ')
+        dp_dir = input('Path of directory containing .dp files to run: ')
     else:
-        dp_file = sys.argv[1]
-    
-    if os.path.isfile(dp_file) and dp_file.lower().endswith('.dp'):
-        dp_autogui(dp_file)
-    else:
-        raise FileNotFoundError("Invalid file.")
+        dp_dir = sys.argv[1]
+
+    dp_autogui_dir(dp_dir)
