@@ -1,27 +1,25 @@
-llvmlite==0.36.0
-matplotlib==3.4.2
-  cycler==0.10.0
-    six==1.16.0
-  kiwisolver==1.3.1
-  numpy==1.21.1
-  Pillow==8.3.1
-  pyparsing==2.4.7
-  python-dateutil==2.8.2
-    six==1.16.0
-openpyxl==3.0.7
-  et-xmlfile==1.1.0
-pandas==1.3.1
-  numpy==1.21.1
-  python-dateutil==2.8.2
-    six==1.16.0
-  pytz==2021.1
-pip-autoremove==0.9.1
-pipdeptree==2.1.0
-  pip==21.2.2
-pkg_resources==0.0.0
-pyinstaller==4.4
-  altgraph==0.17
-  pyinstaller-hooks-contrib==2021.2
-  setuptools==57.4.0
-scipy==1.7.1
-  numpy==1.21.1
+altgraph==0.17.3
+certifi @ file:///C:/b/abs_85o_6fm0se/croot/certifi_1671487778835/work/certifi
+et-xmlfile==1.1.0
+MouseInfo==0.1.3
+numpy==1.24.2
+openpyxl==3.1.1
+pandas==1.5.3
+pefile==2023.2.7
+Pillow==9.4.0
+psutil==5.9.4
+PyAutoGUI==0.9.53
+PyGetWindow==0.0.9
+pyinstaller==5.8.0
+pyinstaller-hooks-contrib==2023.0
+PyMsgBox==1.0.9
+pyperclip==1.8.2
+PyRect==0.2.0
+PyScreeze==0.1.28
+python-dateutil==2.8.2
+pytweening==1.0.4
+pytz==2022.7.1
+pywin32-ctypes==0.2.0
+rarfile==4.0
+six==1.16.0
+wincertstore==0.2
