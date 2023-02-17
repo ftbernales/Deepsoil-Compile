@@ -14,6 +14,18 @@ If this module is ran directly, she will ask for a directory path containing the
 '''
 
 def dp_autogui(dp_file_path):
+    '''
+    This function uses the `dp_file_path` to run a single .dp file automatically
+    in the DEEPSOIL GUI.
+
+    :param dp_file_path:
+        File name of DEEPSOIL .dp profile
+    :type dp_file_path: ``str``
+    
+    Returns the returncode via the subprocess module.
+
+    Checks whether DEEPSOIL program is installed to be added in the future.
+    '''
     with subprocess.Popen([r"C:\Program Files"
                             r"\University of Illinois at Urbana-Champaign"
                             r"\DEEPSOIL 7.0\DEEPSOIL.exe", 
@@ -43,7 +55,7 @@ def dp_autogui(dp_file_path):
         pyautogui.press('tab', presses=17)
         pyautogui.press('space') # de-select generation of motion plots
         pyautogui.press('tab', presses=3)
-        pyautogui.press('space') # select all motions
+        pyautogui.press('space') # select ALL motions in Input Motion Directory
 
         # Select `Next` from *Input Motion Selection*
         time.sleep(2.75)
@@ -80,6 +92,19 @@ def dp_autogui(dp_file_path):
     return result.returncode
 
 def dp_autogui_dir(dp_dirname):
+    '''
+    This function uses the `dp_dirname` to run multiple .dp files in a directory
+    automatically in the DEEPSOIL GUI.
+
+    Internally calls *dp_autogui* function for each .dp in `dp_dirname`
+
+    If DEEPSOIL crashes for a given .dp run, it will automatically attempt to
+    re-run the same .dp file.
+
+    :param dp_dirname:
+        Path to directory containing .dp profiles to run
+    :type dp_dirname: ``str``
+    '''
     if not os.path.isdir(dp_dirname):
         raise FileNotFoundError("Invalid directory.")
 
