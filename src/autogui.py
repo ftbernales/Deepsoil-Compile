@@ -5,6 +5,13 @@ import time
 import os
 import psutil
 
+'''
+This script contains functions for running the DEEPSOIL program using 
+`pyautogui`.
+
+If this module is ran directly, she will ask for a directory path containing the
+.dp files to analyze/execute.
+'''
 
 def dp_autogui(dp_file_path):
     with subprocess.Popen([r"C:\Program Files"
@@ -90,7 +97,7 @@ def is_process_running(process_name):
     '''
     Check if there is a running process that contains the given `process_name`.
     '''
-    #Iterate over the all the running process
+    # Iterate over the all the running process
     for proc in psutil.process_iter():
         try:
             # Check if process name contains the given name string.
