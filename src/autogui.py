@@ -83,12 +83,13 @@ def dp_autogui(dp_file_path):
         pyautogui.press('space') # Analyze
         
         # do until child process of DEEPSOIL is running
-        while is_process_running('soil64.exe'): 
+        time.sleep(1.0)
+        while is_process_running('soil64'): 
             time.sleep(1.0)
         
         pyautogui.hotkey('alt', 'f', 'e') # exit DEEPSOIL
 
-    print(f'Program executed successfully for {dp_file_path}')
+    print(f'Program executed successfully for {dp_file_path} (returncode: {result.returncode})')
     return result.returncode
 
 def dp_autogui_dir(dp_dirname):
@@ -128,8 +129,7 @@ def is_process_running(process_name):
             # Check if process name contains the given name string.
             if process_name.lower() in proc.name().lower():
                 return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied, 
-                psutil.ZombieProcess):
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
     return False;
 
