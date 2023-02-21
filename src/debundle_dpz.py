@@ -354,7 +354,7 @@ def read_pwp_csv(fname=None):
     return layers_pwp
 
 def main():
-    if len(sys.argv) > 0:
+    if len(sys.argv) < 2: # script is called
         # Find all dpz files in current directory
         dpz_list = [file for file in os.listdir() if file.endswith('.dpz')]
         if len(dpz_list) > 1:
@@ -367,7 +367,7 @@ def main():
             # Raise exception if no dpz file found
             raise FileNotFoundError('No dpz file found.')
     else:
-        # Get file name from argv command line; NOT YET TESTED
+        # Get file name from second argument from CLI
         file_name = sys.argv[1]
 
     # Get file extension of argv
@@ -376,7 +376,8 @@ def main():
         raise ValueError('File extension is invalid.')
     else:
         # Default file name to be read for PWP parameter csv files (FOR NOW)
-        fcsv = pathlib.Path(file_name).stem + '_model-inputs.csv'
+        fcsv = os.path.join( os.path.dirname(file_name),
+            pathlib.Path(file_name).stem + '_model-inputs.csv' )
         layers_pwp = read_pwp_csv(fcsv) # read csv file and get layer info dict
         generate_dp_from_zip(file_name, layer_info=layers_pwp) # read zip file
 
