@@ -266,8 +266,13 @@ def generate_dp_from_zip(dpz_file, layer_info=None, output_dir=None):
             
             # Insert line of PWP parameters in list to be written later in file
             # Get PWP model of corresponding layer of ProfileX to Profile1
-            if (l_top_idx[:-1][bl_id-1]) > (i+1):
-                bl_id = next(b_layer_id_iter)
+            try:
+                if (l_top_idx[:-1][bl_id-1]) > (i+1):
+                    bl_id = next(b_layer_id_iter)
+            except IndexError:
+                shutil.rmtree(output_dir) # cleanup if error is raised
+                raise ValueError(
+                    f'Please input unique UNIT_WEIGHT for layers in {dpz_file}')
 
             PWP_model_data = layer_info[bl_id]
             # Convert keys to uppercase
