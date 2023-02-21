@@ -366,7 +366,7 @@ def export_dp_to_zip(output_dir=None):
     '''
     raise NotImplementedError
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) > 0:
         # Find all dpz files in current directory
         dpz_list = [file for file in os.listdir() if file.endswith('.dpz')]
@@ -388,8 +388,10 @@ if __name__ == "__main__":
     if not file_ext.lower() == ".dpz":
         raise ValueError('File extension is invalid.')
     else:
-        dpz_to_zip = replace_file_ext(file_name, to_='gz')
-        # Default file name to be read for PWP parameter csv files (for now)
-        fcsv = os.path.splitext(dpz_to_zip)[0] + '_model-inputs.csv'
+        # Default file name to be read for PWP parameter csv files (FOR NOW)
+        fcsv = pathlib.Path(file_name).stem + '_model-inputs.csv'
         layers_pwp = read_pwp_csv(fcsv) # read csv file and get layer info dict
-        generate_dp_from_zip(dpz_to_zip, layer_info=layers_pwp)
+        generate_dp_from_zip(file_name, layer_info=layers_pwp) # read zip file
+
+if __name__ == "__main__":
+    main()
