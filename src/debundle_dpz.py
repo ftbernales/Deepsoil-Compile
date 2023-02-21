@@ -5,6 +5,7 @@ import shutil
 import pandas as pd
 import re
 import numpy as np
+import zipfile
 from collections import Counter
 
 '''
@@ -75,16 +76,9 @@ PWP_MODEL = {   "S_VD": SandVuceticDobry(), # Sand - Vucetic-Dobry model
                 "C_M": ClayMatasovic()  # Clay - Matasovic model
             }
 
-def replace_file_ext(fname, to_='zip'):
+def generate_dp_from_zip(dpz_file, layer_info=None, output_dir=None):
     '''
-    Replace extension of file while retaining original copy
-    '''
-    temp = 'copy_' + fname
-    shutil.copy(fname, temp)
-    p = pathlib.Path(fname)
-    new_p = p.replace(p.with_suffix('.' + to_))
-    os.replace(temp, temp[len('copy_'):])
-    return new_p
+    Read directory, open & parse ProfileX files, and then insert PWP parameters
 
     :param dpz_file:
         Path name of DEEPSOIL .dpz file
@@ -99,21 +93,27 @@ def replace_file_ext(fname, to_='zip'):
     * `output_dir` (``str``) --
         Name of output file
     '''
-    # Reads manually extracted folder (FOR NOW) because of zip/gzip issues
-    parent_dir = os.path.dirname(os.path.abspath(zip_file))
-    extracted_dir = os.path.join(os.path.join(parent_dir, 
-                        os.path.splitext(zip_file)[0]))
-    dir_list = os.listdir(extracted_dir)
+    # Check if dpz_file is valid
+    if not zipfile.is_zipfile(dpz_file):
+        raise zipfile.BadZipFile(
+            f'{dpz_file} is not a valid .dpz file!')
+    
+    dpz_dir = os.path.dirname(dpz_file)
+      
+    with zipfile.ZipFile(dpz_file) as archive:
+        # Reads DEEPSOIL .dpz file
+        dir_list = archive.namelist()
 
-    # Get list and number of randomized profiles
-    rand_profiles = [i for i in dir_list if 'Profile' in i and '.' not in i]
-    rand_profiles = [i for i in rand_profiles if not '_' in i]
-    num_rands = len(rand_profiles) - 1
+        # Get list and number of randomized profiles
+        rand_profiles = [i for i in dir_list if 'Profile' in i and '.' not in i]
+        rand_profiles = [i for i in rand_profiles if not '_' in i]
+        num_rands = len(rand_profiles) - 1
 
-    # Read Mean Soil Profile definition
-    with open(os.path.join(extracted_dir, 'Profile1'), 'r') as base_profile:
-        # get file contents line by line and output a list
-        contents = base_profile.readlines()
+        # Read Mean Soil Profile definition
+        with archive.open('Profile1') as base_profile:
+            # get file contents line by line and output a list
+            contents = base_profile.readlines()
+            contents = [b.decode('ASCII') for b in contents]
     
     idx = [(x,i) for x,i in enumerate(contents) if '[LAYER]' in i]
     num_idx = len(idx)
@@ -173,9 +173,15 @@ def replace_file_ext(fname, to_='zip'):
         # Save Profile1 data to dict
         Profile1[l_PWP] = {'BASIC': basic_d, 'PWP_MODEL': PWP_inputs}
 
+    # Create output directory with a default name if not provided
+    if output_dir is None: 
+        output_dir = os.path.join(dpz_dir, pathlib.Path(dpz_file).stem)
+
+    os.mkdir(output_dir) # make output directory for .dp files
+
     # Re-write Profile1 to a new .dp file
     dp_output = 'Profile_BL.dp'
-    with open(os.path.join(extracted_dir, dp_output), 'w') as base_profile:
+    with open(os.path.join(output_dir, dp_output), 'w') as base_profile:
         # Set config for ANALYSIS_TYPE to include PWP generation in NL analysis
         # Set config for DISSIPATION conditions
         SET_PWP = ('[ANALYSIS_TYPE]:[NONLINEAR+PWP]\n[DISSIPATION]:[TRUE] '
@@ -193,8 +199,10 @@ def replace_file_ext(fname, to_='zip'):
     rand_profiles.remove('Profile1')
     # Loop for all ProfileX
     for rprof in rand_profiles:
-        with open(os.path.join(extracted_dir, rprof), 'r') as rprof_file:
-            rprof_contents = rprof_file.readlines()
+        with zipfile.ZipFile(dpz_file) as rarchive:
+            with rarchive.open(rprof) as rprof_file:
+                rprof_contents = rprof_file.readlines()
+                rprof_contents = [b.decode('ASCII') for b in rprof_contents]
     
         # Get lines of basic layer info, including thickness
         rl_thk_lines = [l for l in rprof_contents if 'THICKNESS' in l]
@@ -297,7 +305,7 @@ def replace_file_ext(fname, to_='zip'):
 
         # Re-write ProfileX to a new .dp file
         rdp_output = 'Profile' + str(int(rprof.strip('Profile')) - 1) + '.dp'
-        with open(os.path.join(extracted_dir, rdp_output), 'w') as rprof_file:
+        with open(os.path.join(output_dir, rdp_output), 'w') as rprof_file:
             # Set config for ANALYSIS_TYPE to include PWP generation 
             # Set config for DISSIPATION conditions
             SET_PWP = ('[ANALYSIS_TYPE]:[NONLINEAR+PWP]\n[DISSIPATION]:[TRUE] '
