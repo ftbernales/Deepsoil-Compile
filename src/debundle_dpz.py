@@ -3,7 +3,6 @@ import sys
 import pathlib
 import shutil
 import pandas as pd
-import gzip
 import re
 import numpy as np
 from collections import Counter
@@ -87,25 +86,9 @@ def replace_file_ext(fname, to_='zip'):
     os.replace(temp, temp[len('copy_'):])
     return new_p
 
-def gz_extract(directory):
-    extension = ".gz"
-    os.chdir(directory)
-    for item in os.listdir(directory): # loop through items in dir
-      if item.endswith(extension): # check for ".gz" extension
-          gz_name = os.path.abspath(item) # get full path of files
-          # get file name for file within
-          file_name = (os.path.basename(gz_name)).rsplit('.',1)[0] 
-          with gzip.open(gz_name,"rb") as f_in, open(file_name,"wb") as f_out:
-              shutil.copyfileobj(f_in, f_out)
-          os.remove(gz_name) # delete zipped file
-
-def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
-    '''
-    Read zip file, open and parse ProfileX files, and then insert PWP parameters
-
-    :param zip_file:
-        Name of zip file
-    :type zip_file: ``str``
+    :param dpz_file:
+        Path name of DEEPSOIL .dpz file
+    :type dpz_file: ``str``
     :param layer_info:
         Dictionary of layer info with PWP inputs
     :type layer_info: ``dict``
@@ -328,7 +311,6 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
             rprof_file.writelines(rprof_contents)   
 
         print(f'Export of {rdp_output} is successful.')
-    # Delete zip file if it exists
 
 def read_pwp_csv(fname=None):
     '''
@@ -357,14 +339,6 @@ def read_pwp_csv(fname=None):
     # Convert df to dict
     layers_pwp = df_layers_pwp.to_dict('index')
     return layers_pwp
-    
-def export_dp_to_zip(output_dir=None):
-    '''
-    Write and export DEEPSOIL all .dp files packaged in zip file.
-    
-    By default, this will output the zip package within the same directory.
-    '''
-    raise NotImplementedError
 
 def main():
     if len(sys.argv) > 0:
