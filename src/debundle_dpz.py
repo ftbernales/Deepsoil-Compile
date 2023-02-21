@@ -295,12 +295,14 @@ def generate_dp_from_zip(zip_file, layer_info=None, output_dir=None):
 
             # Assemble matching data values
             PWP_inputs = {'PWP_MODEL': model_id}
+            # assemble dissipation params
             PWP_inputs.update( {k:PWP_model_data[k] 
                         for k in list(PWP_model_data.keys()) 
-                        if k in list(dsp.keys())} ) #assemble dissipation params
+                        if k in list(dsp.keys())} )
+            # assemble PWP model params
             PWP_inputs.update( {reqs[k]:PWP_model_data[k] 
                         for k in list(PWP_model_data.keys()) 
-                        if k in list(reqs.keys())} ) # assemble PWP model params
+                        if k in list(reqs.keys())} )
             
             # Line to insert in ProfileX file in DEEPSOIL syntax
             line_PWP = ' '.join([f"[{k}]:[{v}]" for k,v in PWP_inputs.items()])
