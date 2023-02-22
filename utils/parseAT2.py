@@ -37,9 +37,9 @@ def parseAT2(fname):
 
 
 def main():
-    input_dir = "C:\\Users\\francis.bernales\OneDrive - AMH Philippines, Inc\\NP22.063 Chodai 4th Cebu-Mactan Bridge SHA\\06 NP22.063 WORK FILES\\06 SRA (L2)\\01 Input Motions"
-    output_dir = "C:\\Users\\francis.bernales\OneDrive - AMH Philippines, Inc\\NP22.063 Chodai 4th Cebu-Mactan Bridge SHA\\06 NP22.063 WORK FILES\\06 SRA (L2)\\02 DEEPSOIL\\Input Motions"
-    os.mkdir(os.path.join(output_dir, output_dir))
+    input_dir = input('Full path of seed motions directory: ')
+    output_dir = input('Path of output directory: ')
+    # os.mkdir(os.path.join(output_dir, output_dir))
       
     for root, dirs, files in os.walk(input_dir):
         for file in files:

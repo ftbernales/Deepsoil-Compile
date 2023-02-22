@@ -24,8 +24,10 @@ Tools for calculating damped response spectra from ground motion time-histories
 '''
 
 import numpy as np
-from math import sqrt
+import pyrotd
+from math import sqrt, pi
 from scipy.integrate import cumtrapz
+from scipy.fft import rfft, rfftfreq
 import matplotlib.pyplot as plt
 from sm_utils import (_save_image,
                       get_time_vector,
@@ -278,6 +280,54 @@ class NigamJennings(ResponseSpectrum):
             x_v[k, :] = (a_val * const['h1']) - (b_val * const['h2']) - z_4
             x_a[k, :] = (-const['f6'] * x_v[k, :]) - (omega2 * x_d[k, :])
         return x_a, x_v, x_d
+
+class FrequencyDomain(ResponseSpectrum):
+    """
+    Evaluate the response spectrum using the Frequency Domain (FD) Method
+    As stated in the DEEPSOIL 7.0 Manual, use of the FD solution requires 
+    FFTs (Fast Fourier Transforms) to move between the frequency-domain, 
+    where the oscillator transfer function is applied, and the time-domain, 
+    where the peak oscillator response is estimated. Over the frequency 
+    range of the ground motion, the frequency-domain solution is exact. 
+    """
+
+    def __call__(self):
+        """
+        Define the response spectrum
+        """
+        osc_freq = 1. / self.periods
+        FAS = rfft(self.acceleration)
+        freq = rfftfreq(FAS.size)
+
+        PSA = pyrotd.calc_spec_accels(self.d_t, self.acceleration, osc_freq)
+        
+        osc_dsp_ts = pyrotd.calc_oscillator_resp(freq, FAS, self.damping, \
+            osc_freq, osc_type='sd')
+        osc_vel_ts = pyrotd.calc_oscillator_resp(freq, FAS, self.damping, \
+            osc_freq, osc_type='sv')
+        osc_acc_ts = pyrotd.calc_oscillator_resp(freq, FAS, self.damping, \
+            osc_freq, osc_type='sa')
+        
+        self.response_spectrum = {
+            'Period': self.periods,
+            'Acceleration': np.max(np.fabs(osc_acc_ts), axis=0),
+            'Velocity': np.max(np.fabs(osc_vel_ts), axis=0),
+            'Displacement': np.max(np.fabs(osc_dsp_ts), axis=0)}
+        self.response_spectrum['Pseudo-Velocity'] = (2 * pi * osc_freq) * \
+            self.response_spectrum['Displacement']
+        self.response_spectrum['Pseudo-Acceleration'] = \
+            ((2 * pi * osc_freq) ** 2.) * self.response_spectrum['Displacement']
+        time_series = {
+            'Time-Step': self.d_t,
+            'Acceleration': self.acceleration,
+            'Velocity': self.velocity,
+            'Displacement': self.displacement,
+            'PGA': np.max(np.fabs(self.acceleration)),
+            'PGV': np.max(np.fabs(self.velocity)),
+            'PGD': np.max(np.fabs(self.displacement))}
+
+        return self.response_spectrum, time_series, osc_acc_ts, osc_vel_ts, \
+            osc_dsp_ts
 
 
 PLOT_TYPE = {"loglog": lambda ax, x, y : ax.loglog(x, y),

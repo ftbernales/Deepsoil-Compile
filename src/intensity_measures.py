@@ -38,7 +38,8 @@ from sm_utils import (get_velocity_displacement,
                        nextpow2)
 
 RESP_METHOD = {'Newmark-Beta': rsp.NewmarkBeta,
-               'Nigam-Jennings': rsp.NigamJennings}
+               'Nigam-Jennings': rsp.NigamJennings,
+               'Frequency Domain': rsp.FrequencyDomain}
 
 def get_peak_measures(time_step, acceleration, get_vel=False,
     get_disp=False):
