@@ -2,7 +2,6 @@ import os
 import sys
 import warnings
 import math
-import openpyxl
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
