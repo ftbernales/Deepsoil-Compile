@@ -1,7 +1,9 @@
 import os
 import sys
 import warnings
+import math
 import openpyxl
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -101,9 +103,16 @@ def plot_acc_comparison(t1, acc1, t2, acc2, fname='acc.svg',
     ax1.plot(t1, acc1, color='red', label='SCALED')
     ax1.plot(t2, acc2, color='black', label='MATCHED')
     ax1.legend(loc='best')
-    # get 2nd to the last label due to rounding
-    t_end = float(ax1.get_xmajorticklabels()[-2].get_text())
-    ax1.set_xlim(xmin=0, xmax=t_end)
+
+    t_end = t1.max()
+    t_lim = math.ceil(t_end / 10.0) * 10
+    for i in range(6, 11):
+        if (int(round(t_lim)) % i) == 0:
+            tmajor = np.linspace(0., float(t_lim), num=i+1)
+            break
+    
+    ax1.set_xlim(xmin=0, xmax=t_lim)
+    ax1.set_xticks(tmajor)
     ax1.set_xlabel('Time (s)')
     ax1.set_ylabel('Acceleration (g)')
     fig.tight_layout()
@@ -122,9 +131,16 @@ def plot_vel_comparison(t1, vel1, t2, vel2, fname='vel.svg',
     ax1.plot(t1, vel1, color='red', label='SCALED')
     ax1.plot(t2, vel2, color='black', label='MATCHED')
     ax1.legend(loc='best')
-    # get 2nd to the last label due to rounding
-    t_end = float(ax1.get_xmajorticklabels()[-2].get_text()) 
-    ax1.set_xlim(xmin=0, xmax=t_end)
+    
+    t_end = t1.max()
+    t_lim = math.ceil(t_end / 10.0) * 10
+    for i in range(6, 11):
+        if (int(round(t_lim)) % i) == 0:
+            tmajor = np.linspace(0., float(t_lim), num=i+1)
+            break
+    
+    ax1.set_xlim(xmin=0, xmax=t_lim)
+    ax1.set_xticks(tmajor)
     ax1.set_xlabel('Time (s)')
     ax1.set_ylabel('Velocity (cm/s)')
     fig.tight_layout()
@@ -143,9 +159,16 @@ def plot_disp_comparison(t1, disp1, t2, disp2, fname='disp.svg',
     ax1.plot(t1, disp1, color='red', label='SCALED')
     ax1.plot(t2, disp2, color='black', label='MATCHED')
     ax1.legend(loc='best')
-    # get 2nd to the last label due to rounding
-    t_end = float(ax1.get_xmajorticklabels()[-2].get_text())
-    ax1.set_xlim(xmin=0, xmax=t_end)
+    
+    t_end = t1.max()
+    t_lim = math.ceil(t_end / 10.0) * 10
+    for i in range(6, 11):
+        if (int(round(t_lim)) % i) == 0:
+            tmajor = np.linspace(0., float(t_lim), num=i+1)
+            break
+    
+    ax1.set_xlim(xmin=0, xmax=t_lim)
+    ax1.set_xticks(tmajor)
     ax1.set_xlabel('Time (s)')
     ax1.set_ylabel('Displacement (cm)')
     fig.tight_layout()
@@ -163,10 +186,16 @@ def plot_ai_comparison(t1, ai1, t2, ai2, fname='ai.svg', output_format='svg'):
     ax1.plot(t1, ai1, color='red', label='SCALED')
     ax1.plot(t2, ai2, color='black', label='MATCHED')
     ax1.legend(loc='best')
-    # get 2nd to the last label due to rounding
-    t_end = float(ax1.get_xmajorticklabels()[-2].get_text()) 
-    ax1.set_xlim(xmin=0, xmax=t_end)
-    ax1.set_ylim(ymin=0, ymax=100)
+    
+    t_end = t1.max()
+    t_lim = math.ceil(t_end / 10.0) * 10
+    for i in range(6, 11):
+        if (int(round(t_lim)) % i) == 0:
+            tmajor = np.linspace(0., float(t_lim), num=i+1)
+            break
+    
+    ax1.set_xlim(xmin=0, xmax=t_lim)
+    ax1.set_xticks(tmajor)
     ax1.set_xlabel('Time (s)')
     ax1.set_ylabel('Normalized Arias Intensity (%)')
     fig.tight_layout()
