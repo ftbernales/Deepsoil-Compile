@@ -61,7 +61,16 @@ def plot_avd_from_xlsx():
                            time_vector2, husid2 / husid2[-1],
                            ws + ' AI.png')
 
-
+def get_sheets(filename, print_list=True):
+    """
+    Get a printed list of worksheets in an Excel file
+    """
+    wb = pd.ExcelFile(filename, engine='openpyxl')
+    
+    wsnames = wb.sheet_names # get list of worksheet names
+    if print_list:
+        for name in wsnames:
+            print(f"'{name}'", end=" ")
 
 def read_from_xlsx(config):
     """
