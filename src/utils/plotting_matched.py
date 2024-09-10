@@ -94,15 +94,15 @@ def read_from_xlsx(config):
     if len(invalid_sheets) > 0:
         warnings.warn(f"Invalid sheets {invalid_sheets} will be skipped.")
 
-    cols = ['Orig_Time', 'Orig_Acc', 'Orig_Vel', 'Orig_Disp', 'Orig_AI',
-            'Match_Time', 'Match_Acc', 'Match_Vel', 'Match_Disp', 'Match_AI']
+    cols = ['Orig_Time', 'Orig_Acc', 'Orig_Vel', 'Orig_Disp',
+            'Match_Time', 'Match_Acc', 'Match_Vel', 'Match_Disp']
     
     for ws in selected_sheets:
-        df = wb.parse(sheet_name=ws, usecols="A:E,V:Z", names=cols)
+        df = wb.parse(sheet_name=ws, usecols="A:D,V:Y", names=cols)
 
-        df_orig = df.loc[:,cols[:5]]
+        df_orig = df.loc[:,cols[:4]]
         df_orig.dropna(inplace=True)
-        df_match = df.loc[:,cols[5:]]
+        df_match = df.loc[:,cols[4:]]
         df_match.dropna(inplace=True)
 
         data_dict[ws] = {"ORIG/SCALED": df_orig,
