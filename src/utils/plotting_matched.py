@@ -5,7 +5,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-
+from intensity_measures import get_husid
 
 """
 Set of scripts for generating AVD plots from Excel file
@@ -43,12 +43,25 @@ def plot_avd_from_xlsx():
                              data[ws]['ORIG/SCALED']['Orig_Disp'],
                              data[ws]['MATCHED']['Match_Time'],
                              data[ws]['MATCHED']['Match_Disp'],
-                             ws + ' Disp.svg')
-        plot_ai_comparison(data[ws]['ORIG/SCALED']['Orig_Time'],
-                           data[ws]['ORIG/SCALED']['Orig_AI'],
-                           data[ws]['MATCHED']['Match_Time'],
-                           data[ws]['MATCHED']['Match_AI'],
-                           ws + ' AI.svg')
+                             ws + ' Disp.png')
+        
+        time_steps1 = np.diff(data[ws]['ORIG/SCALED']['Orig_Time'])
+        assert np.allclose(time_steps1, time_steps1[0]) is True
+        time_step1 = time_steps1[0]
+        time_steps2 = np.diff(data[ws]['MATCHED']['Match_Time'])
+        assert np.allclose(time_steps2, time_steps2[0]) is True
+        time_step2 = time_steps2[0]
+
+        husid1, time_vector1 = get_husid(data[ws]['ORIG/SCALED']['Orig_Acc'], 
+                                         time_step1)
+        husid2, time_vector2 = get_husid(data[ws]['MATCHED']['Match_Acc'], 
+                                         time_step2)
+
+        plot_ai_comparison(time_vector1, husid1 / husid1[-1], 
+                           time_vector2, husid2 / husid2[-1],
+                           ws + ' AI.png')
+
+
 
 def read_from_xlsx(config):
     """
