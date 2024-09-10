@@ -33,12 +33,12 @@ def plot_avd_from_xlsx():
                             data[ws]['ORIG/SCALED']['Orig_Acc'],
                             data[ws]['MATCHED']['Match_Time'],
                             data[ws]['MATCHED']['Match_Acc'],
-                            ws + ' Acc.svg')
+                            ws + ' Acc.png')
         plot_vel_comparison(data[ws]['ORIG/SCALED']['Orig_Time'],
                             data[ws]['ORIG/SCALED']['Orig_Vel'],
                             data[ws]['MATCHED']['Match_Time'],
                             data[ws]['MATCHED']['Match_Vel'],
-                            ws + ' Vel.svg')
+                            ws + ' Vel.png')
         plot_disp_comparison(data[ws]['ORIG/SCALED']['Orig_Time'],
                              data[ws]['ORIG/SCALED']['Orig_Disp'],
                              data[ws]['MATCHED']['Match_Time'],
@@ -112,8 +112,8 @@ def read_from_xlsx(config):
 
     return data_dict
 
-def plot_acc_comparison(t1, acc1, t2, acc2, fname='acc.svg', 
-                        output_format='svg'):
+def plot_acc_comparison(t1, acc1, t2, acc2, fname='acc.png', 
+                        output_format='png'):
     """
     Plot the comparison of original/scaled & matched acceleration time histories
     """
@@ -140,8 +140,8 @@ def plot_acc_comparison(t1, acc1, t2, acc2, fname='acc.svg',
     fig.savefig(fname, format=output_format)
     plt.close()
 
-def plot_vel_comparison(t1, vel1, t2, vel2, fname='vel.svg', 
-                        output_format='svg'):
+def plot_vel_comparison(t1, vel1, t2, vel2, fname='vel.png', 
+                        output_format='png'):
     """
     Plot the comparison of original/scaled & matched velocity time histories
     """
@@ -168,8 +168,8 @@ def plot_vel_comparison(t1, vel1, t2, vel2, fname='vel.svg',
     fig.savefig(fname, format=output_format)
     plt.close()
 
-def plot_disp_comparison(t1, disp1, t2, disp2, fname='disp.svg', 
-                         output_format='svg'):
+def plot_disp_comparison(t1, disp1, t2, disp2, fname='disp.png', 
+                         output_format='png'):
     """
     Plot the comparison of original/scaled & matched displacement time histories
     """
@@ -196,7 +196,7 @@ def plot_disp_comparison(t1, disp1, t2, disp2, fname='disp.svg',
     fig.savefig(fname, format=output_format)
     plt.close()
 
-def plot_ai_comparison(t1, ai1, t2, ai2, fname='ai.svg', output_format='svg'):
+def plot_ai_comparison(t1, ai1, t2, ai2, fname='ai.png', output_format='png'):
     """
     Plot the comparison of (normalized) Arias Intensity with respect to time
     """
