@@ -13,3 +13,6 @@ build/
 
 # Notebook
 *.ipynb
+
+# PIP bundled package
+*.egg-info
