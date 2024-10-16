@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepsoil-compile"
+version = "0.0.1"
+authors = [
+  { name="ftbernales", email="francisjenner.ae@gmail.com" },
+  { name="stansays"},
+]
+description = "Python scripts for compiling and consolidating (for randomized profiles) the batch_output structure of DEEPSOIL."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Windows",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/ftbernales/Deepsoil-Compile"
+"Bug Tracker" = "https://github.com/ftbernales/Deepsoil-Compile/issues"
