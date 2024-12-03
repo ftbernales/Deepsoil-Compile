@@ -111,7 +111,7 @@ def plot_rs_comparison(targ_periods, targ_psa, matched_periods, psa1, psa2,
     fig.patch.set_edgecolor('black')  
     ax1 = fig.add_subplot(1, 2, 1)
     ax1.loglog(targ_periods, targ_psa, color='red', label='TARGET')
-    ax1.loglog(matched_periods, psa1, color='black', label='ORIGINAL')
+    ax1.loglog(matched_periods, psa1, color='black', label='SCALED')
     ax1.set_xlim(xmin=min(targ_periods.min(), matched_periods.min()), 
                  xmax=max(targ_periods.max(), matched_periods.max()) + 0.1)
     ax1.set_ylim(ymin=10**psa_logmin, 
