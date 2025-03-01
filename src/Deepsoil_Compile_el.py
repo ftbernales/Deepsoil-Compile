@@ -21,8 +21,7 @@ def merge_profile(profile):
     df_stress = pd.DataFrame()
 
     for folder in folders:
-        pos = folder.find('(') - 1
-        motion = folder[7:pos]
+        motion = folder[len("Motion_"):]
         conn = sqlite3.connect('./data/input_files/' + profile + '/' +
                                folder + '/deepsoilout_el.db3')
 
@@ -46,6 +45,10 @@ def merge_profile(profile):
         df_next_disp = pd.read_sql_query(
             'SELECT DEPTH_LAYER_TOP, MIN_DISP_RELATIVE, MAX_DISP_RELATIVE FROM PROFILES',
             conn)
+        if df_next_disp['MAX_DISP_RELATIVE'].isnull().values.any():
+            df_next_disp['MAX_DISP_RELATIVE'] = \
+                df_next_disp['MAX_DISP_RELATIVE'].fillna(0) # fill zeros if Null
+        
         df_next_disp = df_next_disp.abs()
         df_next_disp[motion] = df_next_disp[[
             'MIN_DISP_RELATIVE', 'MAX_DISP_RELATIVE'
@@ -111,9 +114,9 @@ def merge_profile(profile):
     writer_SRA = pd.ExcelWriter('./data/output_files_el/' + profile + '/' +
                                 profile + '_RS.xlsx')
     df_input.to_excel(writer_SRA, 'Input Motion')
-    df_input_mean.to_excel(writer_SRA, 'Input GM Spectra')
+    df_input_mean.to_excel(writer_SRA, 'Input GeoMean Spectra')
     df_surface.to_excel(writer_SRA, 'Surface Motion')
-    df_surface_mean.to_excel(writer_SRA, 'Surface GM Spectra')
+    df_surface_mean.to_excel(writer_SRA, 'Surface GeoMean Spectra')
     df_ampl.to_excel(writer_SRA, 'Amplification Spectra')
     df_ampl_xim.to_excel(writer_SRA, 'Amplification x_IM,ref')
     writer_SRA.save()
@@ -140,7 +143,7 @@ def df_next_comb(xlsx, df, sheet_name, mean_col):
 
 
 def main():
-    start_time = time.time()
+    start_time = time.perf_counter()
     cwd = os.path.abspath('./data/input_files/')
     profiles = os.listdir(cwd)
     profiles = [f for f in profiles if f.startswith('profile_')]
@@ -173,7 +176,7 @@ def main():
         xlsx_RS = pd.ExcelFile('./data/output_files_el/' + profile + '/' +
                                profile + '_RS.xlsx')
         df_surf_comb = df_next_comb(xlsx_RS, df_surf_comb,
-                                'Surface GM Spectra', mean_col)
+                                'Surface GeoMean Spectra', mean_col)
         df_ampl_comb = df_next_comb(xlsx_RS, df_ampl_comb,
                                 'Amplification Spectra', mean_col)
         df_ampl_xim_comb = df_next_comb(xlsx_RS, df_ampl_xim_comb,
@@ -182,7 +185,7 @@ def main():
             df_surf_mtn_GM = pd.read_excel(xlsx_RS,
                             sheet_name='Surface Motion', index_col=0)
             df_surf_GM = pd.read_excel(xlsx_RS,
-                            sheet_name='Surface GM Spectra', index_col=0)
+                            sheet_name='Surface GeoMean Spectra', index_col=0)
             df_ampl_GM = pd.read_excel(xlsx_RS,
                             sheet_name='Amplification Spectra', index_col=0)
             df_ampl_xim_GM = pd.read_excel(xlsx_RS,
@@ -192,7 +195,7 @@ def main():
                 xlsx_RS, sheet_name='Surface Motion', index_col=0),
                                         fill_value=1)
             df_surf_GM = df_surf_GM.mul(pd.read_excel(
-                xlsx_RS, sheet_name='Surface GM Spectra', index_col=0),
+                xlsx_RS, sheet_name='Surface GeoMean Spectra', index_col=0),
                                         fill_value=1)
             df_ampl_GM = df_ampl_GM.mul(pd.read_excel(
                 xlsx_RS, sheet_name='Amplification Spectra', index_col=0),
@@ -284,7 +287,7 @@ def main():
     # Write GMs_Merged
     writer_Merged_GMs = pd.ExcelWriter('./data/output_files_el/GMs_Merged.xlsx')
     df_surf_mtn_GM.to_excel(writer_Merged_GMs, 'Surface Motion')
-    df_surf_GM.to_excel(writer_Merged_GMs, 'Surface GM Spectra')
+    df_surf_GM.to_excel(writer_Merged_GMs, 'Surface GeoMean Spectra')
     df_ampl_GM.to_excel(writer_Merged_GMs, 'Amplification Spectra')
     df_ampl_xim_GM.to_excel(writer_Merged_GMs, 'Amplification x_IM,ref')
     writer_Merged_GMs.save()
@@ -297,7 +300,7 @@ def main():
     df_stress_comb.to_excel(writer_Merged_Prof, 'Stress Ratio')
     writer_Merged_Prof.save()
 
-    end_time = time.time()
+    end_time = time.perf_counter()
     # Log run statistics
     print(  f"Program ran successfully. "
             f"Finished in {(end_time - start_time): .2f} seconds.")
