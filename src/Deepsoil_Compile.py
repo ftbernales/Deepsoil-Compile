@@ -19,6 +19,7 @@ def merge_profile(profile):
     df_disp = pd.DataFrame()
     df_strain = pd.DataFrame()
     df_stress = pd.DataFrame()
+    df_pwp = pd.DataFrame()
 
     for folder in folders:
         motion = folder[len("Motion_"):]
@@ -43,8 +44,8 @@ def merge_profile(profile):
 
         # Displacement
         df_next_disp = pd.read_sql_query(
-            'SELECT DEPTH_LAYER_TOP, MIN_DISP_RELATIVE, MAX_DISP_RELATIVE FROM PROFILES',
-            conn)
+            'SELECT DEPTH_LAYER_TOP, MIN_DISP_RELATIVE, MAX_DISP_RELATIVE FROM \
+                PROFILES', conn)
         df_next_disp = df_next_disp.abs()
         df_next_disp[motion] = df_next_disp[[
             'MIN_DISP_RELATIVE', 'MAX_DISP_RELATIVE'
@@ -70,6 +71,14 @@ def merge_profile(profile):
             'MAX_STRESS_RATIO': motion
         }).set_index('DEPTH_LAYER_MID')
         df_stress = df_next_stress.join(df_stress)
+        
+        # PWP Ratio, if available
+        df_next_pwp = pd.read_sql_query(
+            'SELECT DEPTH_LAYER_MID, MAX_PWP_RATIO FROM PROFILES', conn)
+        df_next_pwp = df_next_pwp.rename(columns={
+            'MAX_PWP_RATIO': motion
+        }).set_index('DEPTH_LAYER_MID')
+        df_pwp = df_next_pwp.join(df_pwp)
 
     df_input = df_input.reindex(sorted(df_input.columns), axis=1)
     df_input_mean = df_input.groupby(df_input.columns.str[:2],
@@ -106,6 +115,10 @@ def merge_profile(profile):
     df_stress = df_stress.reindex(sorted(df_stress.columns), axis=1)
     df_stress['Mean'] = df_stress.mean(axis=1)
 
+    # PWP Ratio Mean, if available
+    df_pwp = df_pwp.reindex(sorted(df_pwp.columns), axis=1)
+    df_pwp['Mean'] = df_pwp.mean(axis=1)
+
     # Write RS to Excel
     writer_SRA = pd.ExcelWriter('./data/output_files/' + profile + '/' +
                                 profile + '_RS.xlsx')
@@ -123,6 +136,7 @@ def merge_profile(profile):
     df_disp.to_excel(writer_Profile, 'Displacement')
     df_strain.to_excel(writer_Profile, 'Strain')
     df_stress.to_excel(writer_Profile, 'Stress Ratio')
+    df_pwp.to_excel(writer_Profile, 'PWP Ratio')
     writer_Profile.save()
 
 
@@ -160,6 +174,7 @@ def main():
     df_disp_comb = pd.DataFrame()
     df_strain_comb = pd.DataFrame()
     df_stress_comb = pd.DataFrame()
+    df_pwp_comb = pd.DataFrame()
     df_surf_GM = pd.DataFrame()
     df_ampl_GM = pd.DataFrame()
     df_ampl_xim_GM = pd.DataFrame()
@@ -235,6 +250,20 @@ def main():
         df_stress_comb = df_next_stress_comb.set_index('Depth').join(
             df_stress_comb)
 
+        # Compile PWP Ratio Tab
+        df_next_pwp_comb = pd.read_excel(xlsx_PF, sheet_name='PWP Ratio')
+        df_next_pwp_comb = df_next_pwp_comb[[
+            'DEPTH_LAYER_MID', 'Mean'
+        ]].rename(columns={
+            'DEPTH_LAYER_MID': 'Depth',
+            'Mean': mean_col
+        })
+        df_next_pwp_comb = pd.merge_asof(df_depths,
+                                        df_next_pwp_comb,
+                                        on='Depth')
+        df_pwp_comb = df_next_pwp_comb.set_index('Depth').join(
+            df_pwp_comb)
+
         # Compile Displacement Tab
         df_next_disp_comb = pd.read_excel(xlsx_PF, sheet_name='Displacement')
         df_next_disp_comb = df_next_disp_comb[['DEPTH_LAYER_TOP', 'Mean'
@@ -259,6 +288,7 @@ def main():
     df_disp_comb = df_disp_comb.reindex(sorted_cols, axis=1)
     df_strain_comb = df_strain_comb.reindex(sorted_cols, axis=1)
     df_stress_comb = df_stress_comb.reindex(sorted_cols, axis=1)
+    df_pwp_comb = df_pwp_comb.reindex(sorted_cols, axis=1)
 
     # RS Geomean for batch run
     n_valid_profiles = df_surf_comb.count(axis=1)
@@ -275,7 +305,7 @@ def main():
 
     # Write RS_Merged
     writer_Merged_RS = pd.ExcelWriter('./data/output_files/RS_Merged.xlsx')
-    df_surf_comb.to_excel(writer_Merged_RS, 'Surface GM Spectra')
+    df_surf_comb.to_excel(writer_Merged_RS, 'Surface GeoMean Spectra')
     df_ampl_comb.to_excel(writer_Merged_RS, 'Amplification Spectra')
     df_ampl_xim_comb.to_excel(writer_Merged_RS, 'Amplification x_IM,ref')
     writer_Merged_RS.save()
@@ -294,6 +324,7 @@ def main():
     df_disp_comb.to_excel(writer_Merged_Prof, 'Displacement')
     df_strain_comb.to_excel(writer_Merged_Prof, 'Strain')
     df_stress_comb.to_excel(writer_Merged_Prof, 'Stress Ratio')
+    df_pwp_comb.to_excel(writer_Merged_Prof, 'PWP Ratio')
     writer_Merged_Prof.save()
 
     end_time = time.perf_counter()
